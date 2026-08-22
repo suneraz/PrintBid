@@ -2,19 +2,25 @@
  * How the conversation actually works, since it's the most involved
  * piece of logic in the whole frontend:
  *
- * 1. Every message the customer sends gets run through the NER model
- *    independently (POST /ner/extract) - the model was trained on
- *    single self-contained sentences, not multi-turn dialogue, so we
- *    don't send it the whole conversation history, just the new text.
- * 2. Whatever fields that message's extraction found get MERGED into
- *    `specification`, a running object that only ever grows/updates -
- *    it's never reset between messages. This is what lets someone
- *    describe their job over several short messages instead of one
- *    perfect paragraph.
- * 3. After merging, we check the same required-fields list the
- *    backend's missing_field_service.py uses (kept in sync manually -
- *    see the comment on REQUIRED_FIELDS below) and ask about the
- *    first one still missing.
+ * 1. The customer's FIRST message goes through the NER model
+ *    (POST /ner/extract), since it's expected to be a fuller
+ *    description ("500 double-sided business cards on 300 GSM...")
+ *    that the model was actually trained to read.
+ * 2. Once the bot has asked a SPECIFIC follow-up question ("How many
+ *    copies do you need?"), the reply to that question is NOT sent
+ *    through NER again - it's assigned directly to the field that
+ *    was asked about. This matters: the NER model was trained on
+ *    full sentences with surrounding context, not bare fragments
+ *    like "12" with nothing around it, and testing showed it
+ *    genuinely misclassifies those (a bare "16" got tagged as
+ *    page_count instead of quantity, for example). Since we already
+ *    know exactly which field a targeted follow-up answers, there's
+ *    no ambiguity to resolve - skipping NER for these is both more
+ *    reliable and faster.
+ * 3. After each answer, `specification` (a running object that only
+ *    ever grows) gets checked against the same required-fields list
+ *    backend's missing_field_service.py uses, and the next missing
+ *    one becomes the next question.
  * 4. Once nothing required is missing, we call the price model and
  *    move to the review step, where every field is directly editable
  *    before submitting - satisfying the proposal's requirement that
@@ -48,6 +54,10 @@ const REQUIRED_FIELDS: { key: string; question: string }[] = [
   { key: 'deadline', question: 'When do you need the order?' },
   { key: 'delivery_method', question: 'Do you need delivery or self-collection?' },
 ];
+
+// Fields that expect a plain number as the answer - anything else in
+// REQUIRED_FIELDS is treated as free text and used as typed.
+const NUMERIC_FIELDS = new Set(['quantity', 'gsm']);
 
 const FIELD_LABELS: Record<string, string> = {
   quantity: 'Quantity',
@@ -89,6 +99,11 @@ export class NewInquiryComponent implements OnInit {
   selectedCategory = signal<PrintCategory | null>(null);
   specification = signal<Record<string, string | number>>({});
 
+  // Which specific field the bot's last message asked about - null
+  // while we're still on the open-ended opening question, since that
+  // one still goes through NER rather than direct assignment.
+  private askedFieldKey: string | null = null;
+
   stage = signal<'chatting' | 'reviewing' | 'submitting' | 'submitted'>('chatting');
   priceEstimate = signal<{ predicted_price: number; price_min: number; price_max: number } | null>(null);
   submitError = signal<string | null>(null);
@@ -117,18 +132,39 @@ export class NewInquiryComponent implements OnInit {
     return null;
   }
 
-  private tryResolveCategory(categoryText: string): void {
-    if (this.selectedCategory()) return;
+  private tryResolveCategory(categoryText: string): boolean {
+    if (this.selectedCategory()) return true;
+    const text = categoryText.toLowerCase().trim();
+
+    // Checked in both directions so singular/plural mismatches still
+    // match - "sticker" said by the customer against "stickers" in
+    // the database, or the other way round.
     const match = this.categories().find(
-      (c) => c.name.toLowerCase() === categoryText.toLowerCase() || categoryText.toLowerCase().includes(c.name.toLowerCase()),
+      (c) => c.name.toLowerCase() === text || c.name.toLowerCase().includes(text) || text.includes(c.name.toLowerCase()),
     );
     if (match) {
       this.selectedCategory.set(match);
+      return true;
     }
+    return false;
   }
 
   private scrollToBottom(): void {
     setTimeout(() => this.messagesEnd?.nativeElement?.scrollIntoView({ behavior: 'smooth' }), 50);
+  }
+
+  private askNext(): void {
+    const missing = this.findMissingField();
+    this.askedFieldKey = missing?.key ?? null;
+
+    if (missing) {
+      this.messages.update((m) => [...m, { role: 'bot', text: missing.question }]);
+      this.scrollToBottom();
+    } else {
+      this.messages.update((m) => [...m, { role: 'bot', text: "Great, I have everything I need. Let me work out a price estimate..." }]);
+      this.scrollToBottom();
+      this.fetchPriceEstimate();
+    }
   }
 
   sendMessage(): void {
@@ -139,6 +175,14 @@ export class NewInquiryComponent implements OnInit {
     this.currentInput.set('');
     this.isProcessing.set(true);
     this.scrollToBottom();
+
+    // A targeted follow-up already tells us which field this answer
+    // is for - assign it directly rather than re-running NER on a
+    // bare fragment it wasn't trained to interpret.
+    if (this.askedFieldKey) {
+      this.assignDirectAnswer(this.askedFieldKey, text);
+      return;
+    }
 
     this.inquiryService.extractSpecification(text).subscribe({
       next: (result) => {
@@ -151,18 +195,8 @@ export class NewInquiryComponent implements OnInit {
         }
 
         this.specification.update((current) => ({ ...current, ...rest }));
-
-        const missing = this.findMissingField();
         this.isProcessing.set(false);
-
-        if (missing) {
-          this.messages.update((m) => [...m, { role: 'bot', text: missing.question }]);
-          this.scrollToBottom();
-        } else {
-          this.messages.update((m) => [...m, { role: 'bot', text: "Great, I have everything I need. Let me work out a price estimate..." }]);
-          this.scrollToBottom();
-          this.fetchPriceEstimate();
-        }
+        this.askNext();
       },
       error: () => {
         this.isProcessing.set(false);
@@ -170,6 +204,39 @@ export class NewInquiryComponent implements OnInit {
         this.scrollToBottom();
       },
     });
+  }
+
+  private assignDirectAnswer(fieldKey: string, text: string): void {
+    if (fieldKey === 'category') {
+      const resolved = this.tryResolveCategory(text);
+      this.isProcessing.set(false);
+      if (!resolved) {
+        this.messages.update((m) => [
+          ...m,
+          { role: 'bot', text: "I don't recognise that category - could you pick one like business cards, flyers, banners, or stickers?" },
+        ]);
+        this.scrollToBottom();
+        return;
+      }
+      this.askNext();
+      return;
+    }
+
+    if (NUMERIC_FIELDS.has(fieldKey)) {
+      const numberMatch = text.match(/\d+/);
+      if (!numberMatch) {
+        this.isProcessing.set(false);
+        this.messages.update((m) => [...m, { role: 'bot', text: "That doesn't look like a number - could you enter just the amount?" }]);
+        this.scrollToBottom();
+        return;
+      }
+      this.specification.update((current) => ({ ...current, [fieldKey]: Number(numberMatch[0]) }));
+    } else {
+      this.specification.update((current) => ({ ...current, [fieldKey]: text }));
+    }
+
+    this.isProcessing.set(false);
+    this.askNext();
   }
 
   fetchPriceEstimate(): void {
