@@ -44,7 +44,9 @@ def _serialize_order(order):
     return {
         "id": order.id,
         "inquiry_id": order.inquiry_id,
+        "print_category": order.inquiry.print_category.name if order.inquiry else None,
         "print_shop_name": order.print_shop.business_name,
+        "customer_name": order.customer.user.full_name if order.customer and order.customer.user else None,
         "status": order.status,
         "delivery_method": order.delivery_method,
         "created_at": order.created_at.isoformat() if order.created_at else None,

@@ -133,3 +133,59 @@ def get_inquiry(inquiry_id):
             "delivery_method": spec.delivery_method,
         } if spec else None,
     }), 200
+
+
+def _serialize_specification(spec):
+    if spec is None:
+        return None
+    return {
+        "quantity": spec.quantity,
+        "standard_size": spec.standard_size,
+        "width": spec.width,
+        "height": spec.height,
+        "paper_type": spec.paper_type,
+        "gsm": spec.gsm,
+        "colour_mode": spec.colour_mode,
+        "sides": spec.sides,
+        "page_count": spec.page_count,
+        "finishing_type": spec.finishing_type,
+        "urgency": spec.urgency,
+        "deadline": spec.deadline,
+        "location": spec.location,
+        "delivery_method": spec.delivery_method,
+    }
+
+
+@inquiries_bp.route("/print-shops/me/open-inquiries/<int:inquiry_id>", methods=["GET"])
+@role_required("print_shop")
+def get_open_inquiry_for_shop(inquiry_id):
+    """
+    A shop's own view of a single inquiry - deliberately separate
+    from the customer-facing get_inquiry above, since the access
+    rule is different: not "do you own this", but "is this still
+    open, and does it match something your shop registered for".
+    """
+    from app.models import PrintShop
+
+    user_id = int(get_jwt_identity())
+    shop = PrintShop.query.filter_by(user_id=user_id).first()
+    if shop is None:
+        return jsonify({"error": "Print shop profile not found"}), 404
+
+    category_ids = [s.print_category_id for s in shop.services]
+
+    inquiry = db.session.get(Inquiry, inquiry_id)
+    if inquiry is None or inquiry.status != "submitted" or inquiry.print_category_id not in category_ids:
+        return jsonify({"error": "Inquiry not found"}), 404
+
+    already_bid = any(b.print_shop_id == shop.id for b in inquiry.bids)
+
+    return jsonify({
+        "id": inquiry.id,
+        "print_category": inquiry.print_category.name,
+        "raw_message": inquiry.raw_message,
+        "predicted_price_min": inquiry.predicted_price_min,
+        "predicted_price_max": inquiry.predicted_price_max,
+        "already_bid": already_bid,
+        "specification": _serialize_specification(inquiry.specification),
+    }), 200

@@ -50,6 +50,46 @@ def _serialize_bid(bid):
     }
 
 
+@bids_bp.route("/print-shops/me/open-inquiries", methods=["GET"])
+@role_required("print_shop")
+def list_open_inquiries_for_shop():
+    """
+    Inquiries a shop can actually bid on: still open (status
+    'submitted'), in a category the shop registered for, with a flag
+    on each one showing whether this shop has already bid on it -
+    the frontend uses that to grey out or hide the bid button rather
+    than letting someone try to bid twice and hit a 409.
+    """
+    shop = _get_current_print_shop()
+    if shop is None:
+        return jsonify({"error": "Print shop profile not found"}), 404
+
+    if shop.approval_status != "approved":
+        return jsonify({"error": "Your shop is not yet approved to view inquiries"}), 403
+
+    category_ids = [s.print_category_id for s in shop.services]
+    if not category_ids:
+        return jsonify([]), 200
+
+    inquiries = (
+        Inquiry.query.filter(Inquiry.status == "submitted", Inquiry.print_category_id.in_(category_ids))
+        .order_by(Inquiry.created_at.desc())
+        .all()
+    )
+
+    already_bid_ids = {b.inquiry_id for b in Bid.query.filter_by(print_shop_id=shop.id).all()}
+
+    return jsonify([{
+        "id": inq.id,
+        "print_category": inq.print_category.name,
+        "raw_message": inq.raw_message,
+        "predicted_price_min": inq.predicted_price_min,
+        "predicted_price_max": inq.predicted_price_max,
+        "created_at": inq.created_at.isoformat() if inq.created_at else None,
+        "already_bid": inq.id in already_bid_ids,
+    } for inq in inquiries]), 200
+
+
 @bids_bp.route("/inquiries/<int:inquiry_id>/bids", methods=["POST"])
 @role_required("print_shop")
 def submit_bid(inquiry_id):
@@ -122,6 +162,7 @@ def list_my_bids():
     return jsonify([{
         "id": bid.id,
         "inquiry_id": bid.inquiry_id,
+        "print_category": bid.inquiry.print_category.name if bid.inquiry else None,
         "bid_price": bid.bid_price,
         "estimated_completion_days": bid.estimated_completion_days,
         "status": bid.status,
