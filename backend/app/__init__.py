@@ -53,4 +53,7 @@ def create_app(config_class=Config):
     from app.routes.admin import admin_bp
     app.register_blueprint(admin_bp, url_prefix="/api/v1")
 
+    from app.routes.categories import categories_bp
+    app.register_blueprint(categories_bp, url_prefix="/api/v1")
+
     return app
