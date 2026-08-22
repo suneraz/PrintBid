@@ -1,0 +1,42 @@
+<div class="page">
+  <div class="page__header">
+    <h1>Users</h1>
+    <p class="page__subtitle">Everyone registered on the platform</p>
+  </div>
+
+  <div class="filter-tabs">
+    <button type="button" [class.filter-tabs__btn--active]="roleFilter() === 'all'" class="filter-tabs__btn" (click)="setFilter('all')">All</button>
+    <button type="button" [class.filter-tabs__btn--active]="roleFilter() === 'customer'" class="filter-tabs__btn" (click)="setFilter('customer')">Customers</button>
+    <button type="button" [class.filter-tabs__btn--active]="roleFilter() === 'print_shop'" class="filter-tabs__btn" (click)="setFilter('print_shop')">Print Shops</button>
+    <button type="button" [class.filter-tabs__btn--active]="roleFilter() === 'admin'" class="filter-tabs__btn" (click)="setFilter('admin')">Admins</button>
+  </div>
+
+  <div class="card table-card">
+    @if (isLoading()) {
+      <p class="loading-state">Loading...</p>
+    } @else if (filteredUsers().length === 0) {
+      <p class="loading-state">No users match this filter.</p>
+    } @else {
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Joined</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (user of filteredUsers(); track user.id) {
+            <tr>
+              <td>{{ user.full_name }}</td>
+              <td>{{ user.email }}</td>
+              <td><span class="role-badge" [class]="'role-badge--' + user.role">{{ user.role.replace('_', ' ') }}</span></td>
+              <td>{{ user.created_at | date: 'MMM d, y' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+</div>

@@ -81,4 +81,27 @@ export const routes: Routes = [
       },
     ],
   },
+  {
+    path: 'admin',
+    canActivate: [authGuard, roleGuard('admin')],
+    loadComponent: () => import('./shared/components/app-shell/app-shell.component').then((m) => m.AppShellComponent),
+    children: [
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./admin/admin-dashboard/admin-dashboard.component').then((m) => m.AdminDashboardComponent),
+      },
+      {
+        path: 'users',
+        loadComponent: () => import('./admin/admin-users/admin-users.component').then((m) => m.AdminUsersComponent),
+      },
+      {
+        path: 'print-shops',
+        loadComponent: () => import('./admin/admin-print-shops/admin-print-shops.component').then((m) => m.AdminPrintShopsComponent),
+      },
+      {
+        path: 'disputes',
+        loadComponent: () => import('./admin/admin-disputes/admin-disputes.component').then((m) => m.AdminDisputesComponent),
+      },
+    ],
+  },
 ];

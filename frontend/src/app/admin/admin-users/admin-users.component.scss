@@ -1,0 +1,64 @@
+.page { max-width: 76rem; }
+.page__header { margin-bottom: var(--space-md); }
+.page__subtitle { color: var(--color-text-muted); margin: 0; }
+
+.filter-tabs {
+  display: flex;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-md);
+}
+
+.filter-tabs__btn {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+
+  &--active {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: white;
+  }
+}
+
+.table-card { padding: var(--space-md); }
+
+table { width: 100%; border-collapse: collapse; }
+
+th {
+  text-align: left;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-text-muted);
+  padding: 0.6rem 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+td {
+  padding: 0.75rem 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.9rem;
+}
+
+.role-badge {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+
+  &--customer { background: var(--color-accent-soft); color: var(--color-accent); }
+  &--print_shop { background: var(--color-warning-soft); color: var(--color-warning); }
+  &--admin { background: var(--color-ink); color: white; }
+}
+
+.loading-state {
+  color: var(--color-text-muted);
+  text-align: center;
+  padding: var(--space-lg) 0;
+}

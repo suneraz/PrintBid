@@ -1,0 +1,111 @@
+.page { max-width: 76rem; }
+.page__header { margin-bottom: var(--space-md); }
+.page__subtitle { color: var(--color-text-muted); margin: 0; }
+
+.filter-tabs {
+  display: flex;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-md);
+}
+
+.filter-tabs__btn {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+
+  &--active {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: white;
+  }
+}
+
+.form-error {
+  color: var(--color-danger);
+  font-size: 0.85rem;
+  margin-bottom: var(--space-sm);
+}
+
+.loading-state {
+  color: var(--color-text-muted);
+  text-align: center;
+  padding: var(--space-lg) 0;
+}
+
+.shop-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--space-md);
+}
+
+.shop-card {
+  padding: var(--space-md);
+}
+
+.shop-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.3rem;
+}
+
+.shop-card__meta {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin: 0 0 0.2rem;
+}
+
+.shop-card__stats {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  margin: var(--space-sm) 0;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: capitalize;
+
+  &--pending { background: var(--color-warning-soft); color: var(--color-warning); }
+  &--approved { background: var(--color-success-soft); color: var(--color-success); }
+  &--rejected { background: var(--color-danger-soft); color: var(--color-danger); }
+}
+
+.shop-card__actions {
+  display: flex;
+  gap: var(--space-xs);
+  margin-top: var(--space-sm);
+}
+
+.button {
+  flex: 1;
+  padding: 0.55rem;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.85rem;
+  border: none;
+
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+}
+
+.button--approve {
+  background: var(--color-success);
+  color: white;
+  &:hover:not(:disabled) { opacity: 0.9; }
+}
+
+.button--reject {
+  background: transparent;
+  color: var(--color-danger);
+  border: 1px solid var(--color-danger);
+  &:hover:not(:disabled) { background: var(--color-danger-soft); }
+}

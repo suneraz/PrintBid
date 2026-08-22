@@ -1,0 +1,60 @@
+<div class="page">
+  <div class="page__header">
+    <h1>Disputes</h1>
+    <p class="page__subtitle">Issues raised by customers or print shops on an order</p>
+  </div>
+
+  <div class="filter-tabs">
+    <button type="button" [class.filter-tabs__btn--active]="statusFilter() === 'open'" class="filter-tabs__btn" (click)="setFilter('open')">Open</button>
+    <button type="button" [class.filter-tabs__btn--active]="statusFilter() === 'resolved'" class="filter-tabs__btn" (click)="setFilter('resolved')">Resolved</button>
+    <button type="button" [class.filter-tabs__btn--active]="statusFilter() === 'rejected'" class="filter-tabs__btn" (click)="setFilter('rejected')">Rejected</button>
+    <button type="button" [class.filter-tabs__btn--active]="statusFilter() === 'all'" class="filter-tabs__btn" (click)="setFilter('all')">All</button>
+  </div>
+
+  @if (isLoading()) {
+    <p class="loading-state">Loading...</p>
+  } @else if (disputes().length === 0) {
+    <p class="loading-state">No disputes in this category.</p>
+  } @else {
+    <div class="dispute-list">
+      @for (dispute of disputes(); track dispute.id) {
+        <div class="dispute-card card">
+          <div class="dispute-card__header">
+            <strong>Order #{{ dispute.order_id }}</strong>
+            <span class="status-badge" [class]="'status-badge--' + dispute.status">{{ dispute.status }}</span>
+          </div>
+          <p class="dispute-card__meta">Raised by {{ dispute.raised_by_email }} &middot; {{ dispute.created_at | date: 'MMM d, y' }}</p>
+          <p class="dispute-card__description">{{ dispute.description }}</p>
+
+          @if (dispute.admin_notes) {
+            <p class="dispute-card__notes"><strong>Admin note:</strong> {{ dispute.admin_notes }}</p>
+          }
+
+          @if (dispute.status === 'open') {
+            <textarea
+              [value]="noteFor(dispute.id)"
+              (input)="setNote(dispute.id, $any($event.target).value)"
+              placeholder="Resolution note (optional)"
+              rows="2"></textarea>
+            <div class="dispute-card__actions">
+              <button
+                type="button"
+                class="button button--resolve"
+                [disabled]="processingId() === dispute.id"
+                (click)="resolve(dispute, 'resolved')">
+                Mark Resolved
+              </button>
+              <button
+                type="button"
+                class="button button--reject"
+                [disabled]="processingId() === dispute.id"
+                (click)="resolve(dispute, 'rejected')">
+                Reject
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

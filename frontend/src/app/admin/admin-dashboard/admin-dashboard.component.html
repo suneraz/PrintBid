@@ -1,0 +1,36 @@
+<div class="page">
+  <div class="page__header">
+    <h1>Admin Dashboard</h1>
+    <p class="page__subtitle">Platform-wide activity at a glance</p>
+  </div>
+
+  @if (stats(); as s) {
+    @if (s.pending_shop_approvals > 0) {
+      <a routerLink="/admin/print-shops" class="alert-banner">
+        {{ s.pending_shop_approvals }} print shop{{ s.pending_shop_approvals === 1 ? '' : 's' }} waiting for approval &rarr;
+      </a>
+    }
+
+    <h2 class="section-title">People</h2>
+    <div class="stat-grid">
+      <app-stat-card label="Total Users" [value]="s.total_users" icon="users" iconColor="var(--color-accent)" iconBg="var(--color-accent-soft)" />
+      <app-stat-card label="Customers" [value]="s.total_customers" icon="users" iconColor="#2a6f97" iconBg="#e8f1f6" />
+      <app-stat-card label="Print Shops" [value]="s.total_print_shops" icon="shop" iconColor="var(--color-warning)" iconBg="var(--color-warning-soft)" />
+    </div>
+
+    <h2 class="section-title">Activity</h2>
+    <div class="stat-grid">
+      <app-stat-card label="Total Inquiries" [value]="s.total_inquiries" icon="list" iconColor="var(--color-accent)" iconBg="var(--color-accent-soft)" />
+      <app-stat-card label="Total Bids" [value]="s.total_bids" icon="tag" iconColor="#2a6f97" iconBg="#e8f1f6" />
+      <app-stat-card label="Total Orders" [value]="s.total_orders" icon="package" iconColor="var(--color-warning)" iconBg="var(--color-warning-soft)" />
+      <app-stat-card label="Completed Orders" [value]="s.completed_orders" icon="check" iconColor="var(--color-success)" iconBg="var(--color-success-soft)" />
+    </div>
+
+    <h2 class="section-title">Needs attention</h2>
+    <div class="stat-grid">
+      <app-stat-card label="Pending Shop Approvals" [value]="s.pending_shop_approvals" icon="shop" iconColor="var(--color-warning)" iconBg="var(--color-warning-soft)" />
+      <app-stat-card label="Open Disputes" [value]="s.open_disputes" icon="flag" iconColor="var(--color-danger)" iconBg="var(--color-danger-soft)" />
+      <app-stat-card label="Total Reviews" [value]="s.total_reviews" icon="award" iconColor="var(--color-success)" iconBg="var(--color-success-soft)" />
+    </div>
+  }
+</div>

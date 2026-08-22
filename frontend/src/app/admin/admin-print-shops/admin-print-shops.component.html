@@ -1,0 +1,59 @@
+<div class="page">
+  <div class="page__header">
+    <h1>Print Shops</h1>
+    <p class="page__subtitle">Approve new shops before they can bid on jobs</p>
+  </div>
+
+  <div class="filter-tabs">
+    <button type="button" [class.filter-tabs__btn--active]="statusFilter() === 'pending'" class="filter-tabs__btn" (click)="setFilter('pending')">Pending</button>
+    <button type="button" [class.filter-tabs__btn--active]="statusFilter() === 'approved'" class="filter-tabs__btn" (click)="setFilter('approved')">Approved</button>
+    <button type="button" [class.filter-tabs__btn--active]="statusFilter() === 'rejected'" class="filter-tabs__btn" (click)="setFilter('rejected')">Rejected</button>
+    <button type="button" [class.filter-tabs__btn--active]="statusFilter() === 'all'" class="filter-tabs__btn" (click)="setFilter('all')">All</button>
+  </div>
+
+  @if (actionError()) {
+    <p class="form-error">{{ actionError() }}</p>
+  }
+
+  @if (isLoading()) {
+    <p class="loading-state">Loading...</p>
+  } @else if (shops().length === 0) {
+    <p class="loading-state">No shops in this category.</p>
+  } @else {
+    <div class="shop-grid">
+      @for (shop of shops(); track shop.id) {
+        <div class="shop-card card">
+          <div class="shop-card__header">
+            <strong>{{ shop.business_name }}</strong>
+            <span class="status-badge" [class]="'status-badge--' + shop.approval_status">{{ shop.approval_status }}</span>
+          </div>
+          <p class="shop-card__meta">{{ shop.email }}</p>
+          <p class="shop-card__meta">{{ shop.district }}</p>
+          <div class="shop-card__stats">
+            <span>★ {{ shop.rating_average || 'No rating yet' }}</span>
+            <span>{{ shop.completed_orders_count }} completed orders</span>
+          </div>
+
+          @if (shop.approval_status === 'pending') {
+            <div class="shop-card__actions">
+              <button
+                type="button"
+                class="button button--approve"
+                [disabled]="processingId() === shop.id"
+                (click)="updateApproval(shop, 'approved')">
+                Approve
+              </button>
+              <button
+                type="button"
+                class="button button--reject"
+                [disabled]="processingId() === shop.id"
+                (click)="updateApproval(shop, 'rejected')">
+                Reject
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,31 @@
+.page { max-width: 76rem; }
+.page__header { margin-bottom: var(--space-lg); }
+.page__subtitle { color: var(--color-text-muted); margin: 0; }
+
+.alert-banner {
+  display: block;
+  background: var(--color-warning-soft);
+  color: var(--color-warning);
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-lg);
+
+  &:hover { opacity: 0.85; }
+}
+
+.section-title {
+  font-size: 1rem;
+  margin: 0 0 var(--space-sm);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
