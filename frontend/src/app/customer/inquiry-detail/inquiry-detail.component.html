@@ -1,0 +1,88 @@
+<div class="page">
+  <a routerLink="/customer/inquiries" class="back-link">&larr; Back to inquiries</a>
+
+  @if (inquiry(); as inq) {
+    <div class="page__header">
+      <h1 class="capitalize">{{ inq.print_category }}</h1>
+      <p class="page__subtitle">{{ inq.raw_message }}</p>
+    </div>
+
+    <div class="spec-summary card">
+      @for (entry of specificationEntries(); track entry[0]) {
+        <div class="spec-item">
+          <span class="spec-item__label">{{ entry[0] }}</span>
+          <span class="spec-item__value">{{ entry[1] }}</span>
+        </div>
+      }
+      <div class="spec-item">
+        <span class="spec-item__label">estimated price</span>
+        <span class="spec-item__value">LKR {{ inq.predicted_price_min | number: '1.0-0' }} - {{ inq.predicted_price_max | number: '1.0-0' }}</span>
+      </div>
+    </div>
+
+    @if (paymentDone()) {
+      <div class="card payment-success">
+        <app-icon name="check" [size]="28" />
+        <h2>Demo Payment - No Real Money Processed</h2>
+        <p>Your order has been confirmed. Track its progress from your orders page.</p>
+        <button type="button" class="button button--primary" (click)="goToOrder()">View My Orders</button>
+      </div>
+    } @else {
+      @if (acceptedBid(); as bid) {
+        <div class="card payment-panel">
+          <h2>Confirm your order</h2>
+          <p>You've accepted <strong>{{ bid.print_shop_name }}</strong>'s bid of <strong>LKR {{ bid.bid_price | number: '1.0-0' }}</strong>.</p>
+
+          @if (suggestedAdvance(); as advance) {
+            <div class="advance-box">
+              <span>Suggested advance payment</span>
+              <strong>LKR {{ advance | number: '1.0-0' }}</strong>
+            </div>
+          }
+
+          <p class="demo-notice">Demo Payment - No Real Money Processed</p>
+
+          <button type="button" class="button button--primary" [disabled]="isSimulatingPayment()" (click)="simulatePayment()">
+            {{ isSimulatingPayment() ? 'Processing...' : 'Simulate Advance Payment' }}
+          </button>
+        </div>
+      } @else {
+        <h2 class="section-title">Bids received</h2>
+
+        @if (isLoading()) {
+          <p class="empty-state">Loading bids...</p>
+        } @else if (bids().length === 0) {
+          <p class="empty-state">No bids yet. Print shops will respond soon.</p>
+        } @else {
+          <div class="bids-list">
+            @for (bid of bids(); track bid.id; let isFirst = $first) {
+              <div class="bid-card card" [class.bid-card--best]="isFirst">
+                @if (isFirst) {
+                  <span class="bid-card__best-tag">Top ranked</span>
+                }
+                <div class="bid-card__header">
+                  <div>
+                    <strong>{{ bid.print_shop_name }}</strong>
+                    <span class="bid-card__rating">★ {{ bid.print_shop_rating | number: '1.1-1' }}</span>
+                  </div>
+                  <span class="bid-card__price">LKR {{ bid.bid_price | number: '1.0-0' }}</span>
+                </div>
+                <p class="bid-card__meta">{{ bid.estimated_completion_days }} day turnaround</p>
+                @if (bid.message) {
+                  <p class="bid-card__message">"{{ bid.message }}"</p>
+                }
+                <button
+                  type="button"
+                  class="button button--primary button--full"
+                  [disabled]="isAccepting() === bid.id"
+                  (click)="acceptBid(bid)">
+                  {{ isAccepting() === bid.id ? 'Accepting...' : 'Accept this bid' }}
+                </button>
+              </div>
+            }
+          </div>
+        }
+      }
+    }
+  }
+</div>

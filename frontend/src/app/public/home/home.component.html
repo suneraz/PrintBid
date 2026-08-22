@@ -1,0 +1,158 @@
+<div class="page">
+  <div class="page__bg-decor" aria-hidden="true"></div>
+
+  <nav class="topnav">
+    <div class="topnav__brand">
+      <div class="topnav__mark"><app-icon name="package" [size]="16" /></div>
+      <span>PrintBid</span>
+    </div>
+
+    <div class="topnav__links">
+      <a href="#how-it-works">How it works</a>
+      <a href="#categories">Categories</a>
+      <a href="#for-shops">For Print Shops</a>
+      <a href="#about">About</a>
+    </div>
+
+    @if (authService.currentUser(); as user) {
+      <div class="topnav__actions">
+        <span class="topnav__welcome">{{ user.full_name }}</span>
+        <a [routerLink]="dashboardPath()" class="button button--primary">Dashboard</a>
+        <button type="button" class="button button--ghost" (click)="logout()">Log out</button>
+      </div>
+    } @else {
+      <div class="topnav__actions">
+        <a routerLink="/login" class="button button--ghost">Sign in</a>
+        <a routerLink="/register" class="button button--primary">Get started</a>
+      </div>
+    }
+  </nav>
+
+  <header class="hero">
+    <div class="hero__layout">
+      <div class="hero__copy">
+        <h1 class="hero__title">
+          Describe it once.<br />
+          <span class="hero__title--accent">Shops compete for you.</span>
+        </h1>
+
+        <p class="hero__subtitle">
+          Business cards, banners, brochures, packaging - describe your job in plain language,
+          get an instant price estimate, and compare real bids from local print shops.
+        </p>
+
+        <div class="hero__actions">
+          @if (!authService.currentUser()) {
+            <a routerLink="/register" class="button button--primary button--lg">Get a quote now</a>
+            <a href="#how-it-works" class="button button--secondary button--lg">
+              <app-icon name="list" [size]="16" />
+              How it works
+            </a>
+          }
+        </div>
+      </div>
+
+      <div class="hero__visual">
+        <div class="hero__bg" [innerHTML]="heroIllustration"></div>
+
+        <div class="floating-card-glow">
+        <div class="floating-card">
+          <div class="floating-card__header">
+            <span>Live Bids</span>
+            <span class="floating-card__pill">3 shops bidding</span>
+          </div>
+          @for (bid of liveBids; track bid.shop) {
+            <div class="floating-card__row" [class.floating-card__row--best]="bid.best">
+              <div class="floating-card__shop">
+                <span class="floating-card__check"><app-icon name="check" [size]="12" /></span>
+                <div>
+                  <strong>{{ bid.shop }}</strong>
+                  <span>{{ bid.turnaround }}</span>
+                </div>
+              </div>
+              <div class="floating-card__price">
+                {{ bid.price }}
+                @if (bid.best) {
+                  <span class="floating-card__best-tag">BEST</span>
+                }
+              </div>
+            </div>
+          }
+          <a routerLink="/register" class="floating-card__cta">Compare all bids</a>
+        </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="categories" id="categories">
+    <h2 class="section-title">Print anything, from anywhere in Sri Lanka</h2>
+    <p class="section-subtitle">Every job type below is ready for AI extraction and instant pricing. Drag or click a card to browse.</p>
+    <app-coverflow-carousel [slides]="categories" />
+  </section>
+
+  <section class="features" id="how-it-works">
+    <div class="features__heading">
+      <div class="features__dots" [innerHTML]="cmykIllustration"></div>
+      <div>
+        <p class="features__eyebrow">Why PrintBid</p>
+        <h2 class="features__title">Everything you need, in one platform</h2>
+      </div>
+    </div>
+    <div class="features__grid">
+      @for (feature of features; track feature.title) {
+        <div class="feature-glow">
+          <div class="feature-card card">
+            <div class="feature-card__icon">
+              <app-icon [name]="feature.icon" [size]="22" />
+            </div>
+            <h3>{{ feature.title }}</h3>
+            <p>{{ feature.description }}</p>
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+
+  <section class="served-by">
+    <p class="served-by__label">Built for every print need</p>
+    <div class="served-by__grid">
+      @for (item of servedBy; track item.label) {
+        <div class="served-by__item">
+          <app-icon [name]="item.icon" [size]="18" />
+          <span>{{ item.label }}</span>
+        </div>
+      }
+    </div>
+  </section>
+
+  <section class="for-shops" id="for-shops">
+    <h2 class="section-title">Running a print shop?</h2>
+    <p class="section-subtitle">Join PrintBid to bid on structured, ready-to-quote jobs from real customers.</p>
+    <div class="features__grid features__grid--three">
+      @for (item of forShops; track item.title) {
+        <div class="feature-card card">
+          <div class="feature-card__icon feature-card__icon--dark">
+            <app-icon [name]="item.icon" [size]="22" />
+          </div>
+          <h3>{{ item.title }}</h3>
+          <p>{{ item.description }}</p>
+        </div>
+      }
+    </div>
+    <a routerLink="/register" class="button button--primary button--lg for-shops__cta">Register your shop</a>
+  </section>
+
+  <section class="about" id="about">
+    <h2 class="section-title">About this project</h2>
+    <p class="section-subtitle">
+      PrintBid is a final-year software engineering dissertation project: an AI-powered reverse-bidding
+      marketplace connecting customers with local print shops across Sri Lanka.
+    </p>
+  </section>
+
+  <footer class="footer">
+    <p>&copy; 2026 PrintBid. All rights reserved.</p>
+    <p class="footer__note">Final year software engineering dissertation project</p>
+  </footer>
+</div>

@@ -1,0 +1,122 @@
+<div class="auth-page">
+  <a routerLink="/" class="back-link">&larr; Back to home</a>
+
+  <div class="auth-page__illustration">
+    <div class="illustration-content" [innerHTML]="illustration"></div>
+    <p class="illustration-tagline">Sri Lanka's print job marketplace</p>
+    <p class="illustration-subtext">Describe your job once. Let local print shops compete for it.</p>
+  </div>
+
+  <div class="auth-page__form-panel">
+  <div class="auth-card">
+    <h1>Create an account</h1>
+
+    <div class="type-toggle">
+      <button
+        type="button"
+        [class.type-toggle__button--active]="accountType() === 'customer'"
+        class="type-toggle__button"
+        (click)="setAccountType('customer')">
+        Customer
+      </button>
+      <button
+        type="button"
+        [class.type-toggle__button--active]="accountType() === 'print_shop'"
+        class="type-toggle__button"
+        (click)="setAccountType('print_shop')">
+        Business
+      </button>
+    </div>
+
+    @if (accountType() === 'customer') {
+      <form [formGroup]="customerForm" (ngSubmit)="onSubmit()">
+        <label>
+          Full name
+          <input type="text" formControlName="full_name" />
+        </label>
+        <label>
+          Email
+          <input type="email" formControlName="email" />
+        </label>
+        <label>
+          Password
+          <input type="password" formControlName="password" />
+          @if (customerForm.controls.password.invalid && customerForm.controls.password.touched) {
+            <span class="field-error">At least 8 characters.</span>
+          }
+        </label>
+        <label>
+          Phone (optional)
+          <input type="tel" formControlName="phone" />
+        </label>
+        <label>
+          Location (optional)
+          <input type="text" formControlName="default_location" placeholder="e.g. Colombo" />
+        </label>
+
+        @if (errorMessage()) {
+          <p class="form-error">{{ errorMessage() }}</p>
+        }
+        @if (successMessage()) {
+          <p class="form-success">{{ successMessage() }}</p>
+        }
+
+        <button type="submit" class="button button--primary" [disabled]="isSubmitting()">
+          {{ isSubmitting() ? 'Creating account...' : 'Create account' }}
+        </button>
+      </form>
+    } @else {
+      <form [formGroup]="shopForm" (ngSubmit)="onSubmit()">
+        <label>
+          Owner full name
+          <input type="text" formControlName="full_name" />
+        </label>
+        <label>
+          Email
+          <input type="email" formControlName="email" />
+        </label>
+        <label>
+          Password
+          <input type="password" formControlName="password" />
+          @if (shopForm.controls.password.invalid && shopForm.controls.password.touched) {
+            <span class="field-error">At least 8 characters.</span>
+          }
+        </label>
+        <label>
+          Phone (optional)
+          <input type="tel" formControlName="phone" />
+        </label>
+        <label>
+          Business name
+          <input type="text" formControlName="business_name" />
+        </label>
+        <label>
+          Business address (optional)
+          <input type="text" formControlName="business_address" />
+        </label>
+        <label>
+          District (optional)
+          <input type="text" formControlName="district" placeholder="e.g. Kaduwela" />
+        </label>
+
+        <p class="hint">Your shop will need admin approval before you can bid on jobs.</p>
+
+        @if (errorMessage()) {
+          <p class="form-error">{{ errorMessage() }}</p>
+        }
+        @if (successMessage()) {
+          <p class="form-success">{{ successMessage() }}</p>
+        }
+
+        <button type="submit" class="button button--primary" [disabled]="isSubmitting()">
+          {{ isSubmitting() ? 'Creating account...' : 'Create account' }}
+        </button>
+      </form>
+    }
+
+    <p class="auth-switch">
+      Already have an account? <a routerLink="/login">Log in</a>
+    </p>
+  </div>
+  </div>
+</div>

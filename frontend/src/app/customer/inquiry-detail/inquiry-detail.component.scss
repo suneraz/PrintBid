@@ -1,0 +1,169 @@
+.page {
+  max-width: 56rem;
+}
+
+.back-link {
+  display: inline-block;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-md);
+
+  &:hover { color: var(--color-accent); }
+}
+
+.page__header {
+  margin-bottom: var(--space-md);
+}
+
+.page__subtitle {
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.capitalize { text-transform: capitalize; }
+
+.spec-summary {
+  padding: var(--space-md);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+}
+
+.spec-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.spec-item__label {
+  font-size: 0.72rem;
+  text-transform: capitalize;
+  color: var(--color-text-muted);
+}
+
+.spec-item__value {
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.section-title {
+  font-size: 1.1rem;
+  margin-bottom: var(--space-sm);
+}
+
+.bids-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.bid-card {
+  padding: var(--space-md);
+  position: relative;
+
+  &--best {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 2px var(--color-accent-soft);
+  }
+}
+
+.bid-card__best-tag {
+  position: absolute;
+  top: -10px;
+  right: var(--space-md);
+  background: var(--color-accent);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+}
+
+.bid-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.3rem;
+}
+
+.bid-card__rating {
+  font-size: 0.8rem;
+  color: var(--color-warning);
+  margin-left: 0.5rem;
+}
+
+.bid-card__price {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+.bid-card__meta {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  margin: 0 0 0.4rem;
+}
+
+.bid-card__message {
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-sm);
+}
+
+.button--primary {
+  background: var(--color-accent);
+  color: white;
+  border: none;
+  padding: 0.6rem;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.88rem;
+
+  &:hover:not(:disabled) { background: var(--color-accent-hover); }
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+}
+
+.button--full { width: 100%; }
+
+.payment-panel, .payment-success {
+  padding: var(--space-xl);
+  text-align: center;
+  max-width: 26rem;
+  margin: 0 auto;
+
+  h2 { font-size: 1.2rem; }
+  p { color: var(--color-text-muted); font-size: 0.9rem; }
+}
+
+.payment-success {
+  color: var(--color-success);
+}
+
+.advance-box {
+  background: var(--color-accent-soft);
+  border-radius: var(--radius-sm);
+  padding: var(--space-md);
+  margin: var(--space-md) 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+
+  span { font-size: 0.78rem; color: var(--color-text-muted); }
+  strong { font-size: 1.3rem; color: var(--color-accent); }
+}
+
+.demo-notice {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-warning);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin-bottom: var(--space-md);
+}
+
+.empty-state {
+  color: var(--color-text-muted);
+  text-align: center;
+  padding: var(--space-lg) 0;
+}

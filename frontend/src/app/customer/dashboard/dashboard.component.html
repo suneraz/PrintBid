@@ -1,0 +1,81 @@
+<div class="page">
+  <div class="page__header">
+    <div>
+      <h1>Dashboard</h1>
+      <p class="page__subtitle">Track your print inquiries and orders</p>
+    </div>
+    <a routerLink="/customer/new-inquiry" class="button button--primary">+ New Inquiry</a>
+  </div>
+
+  <div class="stat-grid">
+    <app-stat-card
+      label="Total Inquiries"
+      [value]="inquiries().length"
+      subtitle="All time"
+      icon="list"
+      iconColor="var(--color-accent)"
+      iconBg="var(--color-accent-soft)" />
+    <app-stat-card
+      label="Awaiting Bids"
+      [value]="activeInquiriesCount()"
+      subtitle="Open for print shops to bid on"
+      icon="tag"
+      iconColor="var(--color-warning)"
+      iconBg="var(--color-warning-soft)" />
+    <app-stat-card
+      label="Orders In Progress"
+      [value]="ordersInProgressCount()"
+      subtitle="Currently being printed or delivered"
+      icon="package"
+      iconColor="#2a6f97"
+      iconBg="#e8f1f6" />
+    <app-stat-card
+      label="Completed Orders"
+      [value]="completedOrdersCount()"
+      subtitle="Successfully delivered"
+      icon="check"
+      iconColor="var(--color-success)"
+      iconBg="var(--color-success-soft)" />
+  </div>
+
+  <div class="card table-card">
+    <div class="table-card__header">
+      <h2>Recent Inquiries</h2>
+      <a routerLink="/customer/inquiries">View all</a>
+    </div>
+
+    @if (recentInquiries().length === 0) {
+      <app-empty-state
+        icon="chat"
+        title="No inquiries yet"
+        description="Describe your first print job and local shops will start bidding on it."
+        actionLabel="+ New Inquiry"
+        actionLink="/customer/new-inquiry" />
+    } @else {
+      <table>
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Status</th>
+            <th>Estimated Price</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (inquiry of recentInquiries(); track inquiry.id) {
+            <tr>
+              <td class="capitalize">{{ inquiry.print_category }}</td>
+              <td>
+                <span class="status-badge" [class]="'status-badge--' + inquiry.status">
+                  {{ inquiry.status }}
+                </span>
+              </td>
+              <td>{{ formatPriceRange(inquiry.predicted_price_min, inquiry.predicted_price_max) }}</td>
+              <td>{{ inquiry.created_at | date: 'MMM d, y' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+</div>

@@ -1,0 +1,65 @@
+<div class="page">
+  <a routerLink="/print-shop/open-inquiries" class="back-link">&larr; Back to open inquiries</a>
+
+  @if (loadError()) {
+    <div class="card notice-card">{{ loadError() }}</div>
+  } @else if (isLoading()) {
+    <p class="loading-state">Loading...</p>
+  } @else {
+    @if (inquiry(); as inq) {
+      <div class="page__header">
+        <h1 class="capitalize">{{ inq.print_category }}</h1>
+        <p class="page__subtitle">{{ inq.raw_message }}</p>
+      </div>
+
+      <div class="spec-summary card">
+        @for (entry of specificationEntries(); track entry[0]) {
+          <div class="spec-item">
+            <span class="spec-item__label">{{ entry[0] }}</span>
+            <span class="spec-item__value">{{ entry[1] }}</span>
+          </div>
+        }
+        <div class="spec-item">
+          <span class="spec-item__label">customer's estimated range</span>
+          <span class="spec-item__value">LKR {{ inq.predicted_price_min | number: '1.0-0' }} - {{ inq.predicted_price_max | number: '1.0-0' }}</span>
+        </div>
+      </div>
+
+      @if (submitted()) {
+        <div class="card success-box">
+          <p>Your bid has been submitted. You'll be notified if the customer accepts it.</p>
+          <button type="button" class="button button--primary" (click)="goToOpenInquiries()">Back to Open Inquiries</button>
+        </div>
+      } @else if (inq.already_bid) {
+        <div class="card notice-card">You've already placed a bid on this inquiry.</div>
+      } @else {
+        <form class="card bid-form" [formGroup]="form" (ngSubmit)="submitBid()">
+          <h2>Submit your bid</h2>
+
+          <label>
+            Your price (LKR)
+            <input type="number" formControlName="bid_price" min="1" placeholder="e.g. 15000" />
+          </label>
+
+          <label>
+            Estimated completion (days)
+            <input type="number" formControlName="estimated_completion_days" min="1" placeholder="e.g. 3" />
+          </label>
+
+          <label>
+            Message to customer (optional)
+            <textarea formControlName="message" rows="3" placeholder="Any details that might help win this job..."></textarea>
+          </label>
+
+          @if (submitError()) {
+            <p class="form-error">{{ submitError() }}</p>
+          }
+
+          <button type="submit" class="button button--primary button--full" [disabled]="isSubmitting()">
+            {{ isSubmitting() ? 'Submitting...' : 'Submit Bid' }}
+          </button>
+        </form>
+      }
+    }
+  }
+</div>

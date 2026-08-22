@@ -1,0 +1,84 @@
+import { Routes } from '@angular/router';
+
+import { authGuard } from './core/guards/auth.guard';
+import { roleGuard } from './core/guards/role.guard';
+
+export const routes: Routes = [
+  {
+    path: '',
+    loadComponent: () => import('./public/home/home.component').then((m) => m.HomeComponent),
+  },
+  {
+    path: 'login',
+    loadComponent: () => import('./public/login/login.component').then((m) => m.LoginComponent),
+  },
+  {
+    path: 'register',
+    loadComponent: () => import('./public/register/register.component').then((m) => m.RegisterComponent),
+  },
+  {
+    // Every route nested under here renders inside the AppShell's
+    // sidebar layout, and authGuard blocks the whole group if you're
+    // not logged in - so individual pages don't need to repeat that check.
+    path: 'customer',
+    canActivate: [authGuard, roleGuard('customer')],
+    loadComponent: () => import('./shared/components/app-shell/app-shell.component').then((m) => m.AppShellComponent),
+    children: [
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./customer/dashboard/dashboard.component').then((m) => m.CustomerDashboardComponent),
+      },
+      {
+        path: 'new-inquiry',
+        loadComponent: () => import('./customer/new-inquiry/new-inquiry.component').then((m) => m.NewInquiryComponent),
+      },
+      {
+        path: 'inquiries',
+        loadComponent: () => import('./customer/inquiries-list/inquiries-list.component').then((m) => m.InquiriesListComponent),
+      },
+      {
+        path: 'inquiries/:id',
+        loadComponent: () => import('./customer/inquiry-detail/inquiry-detail.component').then((m) => m.InquiryDetailComponent),
+      },
+      {
+        path: 'orders',
+        loadComponent: () => import('./customer/orders-list/orders-list.component').then((m) => m.OrdersListComponent),
+      },
+      {
+        path: 'orders/:id',
+        loadComponent: () => import('./customer/order-detail/order-detail.component').then((m) => m.OrderDetailComponent),
+      },
+    ],
+  },
+  {
+    path: 'print-shop',
+    canActivate: [authGuard, roleGuard('print_shop')],
+    loadComponent: () => import('./shared/components/app-shell/app-shell.component').then((m) => m.AppShellComponent),
+    children: [
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./print-shop/dashboard/dashboard.component').then((m) => m.ShopDashboardComponent),
+      },
+      {
+        path: 'open-inquiries',
+        loadComponent: () => import('./print-shop/open-inquiries-list/open-inquiries-list.component').then((m) => m.OpenInquiriesListComponent),
+      },
+      {
+        path: 'open-inquiries/:id',
+        loadComponent: () => import('./print-shop/inquiry-bid/inquiry-bid.component').then((m) => m.InquiryBidComponent),
+      },
+      {
+        path: 'bids',
+        loadComponent: () => import('./print-shop/my-bids/my-bids.component').then((m) => m.MyBidsComponent),
+      },
+      {
+        path: 'orders',
+        loadComponent: () => import('./print-shop/shop-orders-list/shop-orders-list.component').then((m) => m.ShopOrdersListComponent),
+      },
+      {
+        path: 'orders/:id',
+        loadComponent: () => import('./print-shop/shop-order-detail/shop-order-detail.component').then((m) => m.ShopOrderDetailComponent),
+      },
+    ],
+  },
+];

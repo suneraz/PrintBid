@@ -1,0 +1,22 @@
+<div class="coverflow">
+  <div
+    #frame
+    class="coverflow__frame"
+    tabindex="0"
+    (pointerdown)="onPointerDown($event)"
+    (pointermove)="onPointerMove($event)"
+    (pointerup)="onPointerUp()"
+    (pointercancel)="onPointerUp()"
+    (keydown.arrowleft)="nudge(-1)"
+    (keydown.arrowright)="nudge(1)">
+    <div class="coverflow__track">
+      @for (slide of slides; track slide.name) {
+        <div #card class="coverflow__card" (click)="onCardClick($index)">
+          <div class="coverflow__glow">
+            <img [src]="slide.image" [alt]="slide.name" class="coverflow__image" draggable="false" />
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>

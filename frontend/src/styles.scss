@@ -1,0 +1,88 @@
+/* Global design tokens. Purple accent + pearl-white surfaces
+   throughout, with a deep purple-black sidebar in the authenticated
+   app shell as the one deliberately dark surface. */
+
+:root {
+  /* Core surfaces */
+  --color-pearl: #faf9fc;
+  --color-surface: #ffffff;
+  --color-border: #e8e5f2;
+
+  /* Ink - dark sidebar + primary text, purple-tinted rather than neutral navy */
+  --color-ink: #1a1626;
+  --color-ink-raised: #241f35;
+  --color-ink-border: #322c47;
+
+  /* Accent - purple, used for primary actions and highlights */
+  --color-accent: #6952e0;
+  --color-accent-hover: #5741c7;
+  --color-accent-soft: #efebfc;
+
+  /* Status colors - kept as distinct semantic colors, not competing with the purple brand accent */
+  --color-success: #3f8f6f;
+  --color-success-soft: #e8f3ee;
+  --color-warning: #b8863b;
+  --color-warning-soft: #faf3e6;
+  --color-danger: #c1443c;
+  --color-danger-soft: #fbeae9;
+
+  --color-text: #1a1626;
+  --color-text-muted: #6b7280;
+  --color-text-on-ink: #ede9f7;
+  --color-text-on-ink-muted: #9891b0;
+
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+
+  --space-xs: 0.5rem;
+  --space-sm: 0.75rem;
+  --space-md: 1.25rem;
+  --space-lg: 2rem;
+  --space-xl: 3rem;
+
+  --shadow-card: 0 1px 2px rgba(26, 22, 38, 0.04), 0 1px 8px rgba(26, 22, 38, 0.04);
+  --shadow-float: 0 12px 32px rgba(105, 82, 224, 0.14), 0 2px 8px rgba(26, 22, 38, 0.06);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--color-pearl);
+  color: var(--color-text);
+  line-height: 1.5;
+}
+
+h1, h2, h3, h4 {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0 0 var(--space-sm);
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+a {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+}

@@ -1,0 +1,62 @@
+<div class="page">
+  <a routerLink="/customer/orders" class="back-link">&larr; Back to orders</a>
+
+  @if (order(); as order) {
+    <div class="page__header">
+      <h1>{{ order.print_shop_name }}</h1>
+      <p class="page__subtitle">Order #{{ order.id }} &middot; {{ order.delivery_method }}</p>
+    </div>
+
+    @if (order.status === 'Cancelled') {
+      <div class="card cancelled-banner">This order was cancelled.</div>
+    } @else {
+      <div class="card stepper">
+        @for (stage of stages; track stage) {
+          <div class="step" [class]="'step--' + stageState(stage)">
+            <div class="step__dot">
+              @if (stageState(stage) === 'done') {
+                <app-icon name="check" [size]="12" />
+              }
+            </div>
+            <span class="step__label">{{ stage }}</span>
+          </div>
+        }
+      </div>
+    }
+
+    <h2 class="section-title">Status history</h2>
+    <div class="card history-card">
+      @for (entry of order.status_history; track $index) {
+        <div class="history-entry">
+          <strong>{{ entry.status }}</strong>
+          <span>{{ entry.changed_at | date: 'MMM d, y, h:mm a' }}</span>
+          @if (entry.note) {
+            <p>{{ entry.note }}</p>
+          }
+        </div>
+      }
+    </div>
+
+    @if (order.status === 'Completed') {
+      <h2 class="section-title">Leave a review</h2>
+      <div class="card review-card">
+        @if (reviewSubmitted()) {
+          <p class="review-thanks">Thanks for your feedback!</p>
+        } @else {
+          <div class="star-rating">
+            @for (star of [1, 2, 3, 4, 5]; track star) {
+              <button type="button" class="star" [class.star--filled]="star <= rating()" (click)="setRating(star)">★</button>
+            }
+          </div>
+          <textarea [value]="comment()" (input)="comment.set($any($event.target).value)" placeholder="How was your experience? (optional)" rows="3"></textarea>
+          @if (reviewError()) {
+            <p class="form-error">{{ reviewError() }}</p>
+          }
+          <button type="button" class="button button--primary" [disabled]="isSubmittingReview()" (click)="submitReview()">
+            {{ isSubmittingReview() ? 'Submitting...' : 'Submit Review' }}
+          </button>
+        }
+      </div>
+    }
+  }
+</div>

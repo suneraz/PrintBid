@@ -1,0 +1,32 @@
+<div class="page">
+  <div class="page__header">
+    <h1>My Orders</h1>
+    <p class="page__subtitle">Track your confirmed orders</p>
+  </div>
+
+  @if (isLoading()) {
+    <p class="loading-state">Loading...</p>
+  } @else if (orders().length === 0) {
+    <div class="card">
+      <app-empty-state
+        icon="package"
+        title="No orders yet"
+        description="Orders appear here once you accept a bid and confirm the advance payment."
+        actionLabel="View My Inquiries"
+        actionLink="/customer/inquiries" />
+    </div>
+  } @else {
+    <div class="orders-grid">
+      @for (order of orders(); track order.id) {
+        <a [routerLink]="[order.id]" class="order-card card">
+          <div class="order-card__header">
+            <strong>{{ order.print_shop_name }}</strong>
+            <span class="status-badge">{{ order.status }}</span>
+          </div>
+          <p class="order-card__meta">Order #{{ order.id }} &middot; {{ order.delivery_method }}</p>
+          <p class="order-card__date">Placed {{ order.created_at | date: 'MMM d, y' }}</p>
+        </a>
+      }
+    </div>
+  }
+</div>

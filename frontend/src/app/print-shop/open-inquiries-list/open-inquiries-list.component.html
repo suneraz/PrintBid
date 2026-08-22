@@ -1,0 +1,44 @@
+<div class="page">
+  <div class="page__header">
+    <h1>Open Inquiries</h1>
+    <p class="page__subtitle">Jobs matching your registered categories, ready to bid on</p>
+  </div>
+
+  @if (loadError()) {
+    <div class="card notice-card">{{ loadError() }}</div>
+  } @else if (isLoading()) {
+    <p class="loading-state">Loading...</p>
+  } @else if (inquiries().length === 0) {
+    <div class="card">
+      <app-empty-state
+        icon="list"
+        title="No open inquiries right now"
+        description="New inquiries matching your registered print categories will appear here as customers submit them." />
+    </div>
+  } @else {
+    <div class="inquiry-grid">
+      @for (inquiry of inquiries(); track inquiry.id) {
+        <div class="inquiry-card card">
+          <div class="inquiry-card__header">
+            <span class="inquiry-card__category">{{ inquiry.print_category }}</span>
+            @if (inquiry.already_bid) {
+              <span class="inquiry-card__badge">Already bid</span>
+            }
+          </div>
+          <p class="inquiry-card__message">{{ inquiry.raw_message }}</p>
+          <div class="inquiry-card__footer">
+            <span class="inquiry-card__price">
+              LKR {{ inquiry.predicted_price_min | number: '1.0-0' }} - {{ inquiry.predicted_price_max | number: '1.0-0' }}
+            </span>
+            <span class="inquiry-card__date">{{ inquiry.created_at | date: 'MMM d' }}</span>
+          </div>
+          @if (inquiry.already_bid) {
+            <span class="button button--disabled">Already bid</span>
+          } @else {
+            <a [routerLink]="[inquiry.id]" class="button button--primary">View &amp; Bid</a>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

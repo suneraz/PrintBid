@@ -1,0 +1,40 @@
+<div class="page">
+  <div class="page__header">
+    <h1>My Bids</h1>
+    <p class="page__subtitle">Every bid you've submitted and its current status</p>
+  </div>
+
+  <div class="card table-card">
+    @if (isLoading()) {
+      <p class="loading-state">Loading...</p>
+    } @else if (bids().length === 0) {
+      <app-empty-state
+        icon="tag"
+        title="No bids yet"
+        description="Bids you submit on open inquiries will show up here." />
+    } @else {
+      <table>
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Your Price</th>
+            <th>Turnaround</th>
+            <th>Status</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (bid of bids(); track bid.id) {
+            <tr>
+              <td class="capitalize">{{ bid.print_category }}</td>
+              <td>LKR {{ bid.bid_price | number: '1.0-0' }}</td>
+              <td>{{ bid.estimated_completion_days }} days</td>
+              <td><span class="status-badge" [class]="'status-badge--' + bid.status">{{ bid.status }}</span></td>
+              <td>{{ bid.created_at | date: 'MMM d, y' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+</div>

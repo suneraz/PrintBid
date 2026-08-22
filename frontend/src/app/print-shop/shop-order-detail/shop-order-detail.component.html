@@ -1,0 +1,59 @@
+<div class="page">
+  <a routerLink="/print-shop/orders" class="back-link">&larr; Back to orders</a>
+
+  @if (order(); as order) {
+    <div class="page__header">
+      <h1>{{ order.customer_name }}</h1>
+      <p class="page__subtitle capitalize">Order #{{ order.id }} &middot; {{ order.print_category }} &middot; {{ order.delivery_method }}</p>
+    </div>
+
+    @if (order.status === 'Cancelled') {
+      <div class="card cancelled-banner">This order was cancelled.</div>
+    } @else {
+      <div class="card stepper">
+        @for (stage of stages; track stage) {
+          <div class="step" [class]="'step--' + stageState(stage)">
+            <div class="step__dot">
+              @if (stageState(stage) === 'done') {
+                <app-icon name="check" [size]="12" />
+              }
+            </div>
+            <span class="step__label">{{ stage }}</span>
+          </div>
+        }
+      </div>
+    }
+
+    @if (nextStage(); as next) {
+      <div class="card action-card">
+        <h2>Update status</h2>
+        <p class="action-card__hint">Mark this order's next stage once it's actually reached.</p>
+        <textarea [value]="note()" (input)="note.set($any($event.target).value)" placeholder="Optional note (e.g. tracking number, pickup time)" rows="2"></textarea>
+        @if (updateError()) {
+          <p class="form-error">{{ updateError() }}</p>
+        }
+        <div class="action-card__buttons">
+          <button type="button" class="button button--primary" [disabled]="isUpdating()" (click)="advanceStatus()">
+            {{ isUpdating() ? 'Updating...' : 'Mark as ' + next }}
+          </button>
+          <button type="button" class="button button--danger-ghost" [disabled]="isUpdating()" (click)="cancelOrder()">
+            Cancel Order
+          </button>
+        </div>
+      </div>
+    }
+
+    <h2 class="section-title">Status history</h2>
+    <div class="card history-card">
+      @for (entry of order.status_history; track $index) {
+        <div class="history-entry">
+          <strong>{{ entry.status }}</strong>
+          <span>{{ entry.changed_at | date: 'MMM d, y, h:mm a' }}</span>
+          @if (entry.note) {
+            <p>{{ entry.note }}</p>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

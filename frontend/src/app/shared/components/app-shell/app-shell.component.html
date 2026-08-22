@@ -1,0 +1,41 @@
+<div class="shell">
+  <aside class="sidebar">
+    <div class="sidebar__brand">
+      <div class="sidebar__mark"></div>
+      <span>PrintBid</span>
+    </div>
+
+    <nav class="sidebar__nav">
+      @for (item of navItems(); track item.path) {
+        <a
+          [routerLink]="item.path"
+          routerLinkActive="sidebar__link--active"
+          [routerLinkActiveOptions]="{ exact: item.path === '/' }"
+          class="sidebar__link">
+          <app-icon [name]="item.icon" [size]="18" />
+          <span>{{ item.label }}</span>
+        </a>
+      }
+    </nav>
+
+    <div class="sidebar__footer">
+      @if (authService.currentUser(); as user) {
+        <div class="sidebar__user">
+          <div class="sidebar__avatar">{{ user.full_name.charAt(0) }}</div>
+          <div class="sidebar__user-info">
+            <span class="sidebar__user-name">{{ user.full_name }}</span>
+            <span class="sidebar__user-role">{{ user.role.replace('_', ' ') }}</span>
+          </div>
+        </div>
+      }
+      <button type="button" class="sidebar__logout" (click)="logout()">
+        <app-icon name="logout" [size]="16" />
+        <span>Log out</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="content">
+    <router-outlet></router-outlet>
+  </main>
+</div>

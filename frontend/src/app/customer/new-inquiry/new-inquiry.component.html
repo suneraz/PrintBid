@@ -1,0 +1,117 @@
+<div class="page">
+  <div class="page__header">
+    <h1>New Inquiry</h1>
+    <p class="page__subtitle">Describe your print job and I'll work out the details with you</p>
+  </div>
+
+  <div class="layout">
+    <!-- Chat panel -->
+    <div class="chat-panel card">
+      <div class="chat-messages">
+        @for (message of messages(); track $index) {
+          <div class="message" [class.message--user]="message.role === 'user'">
+            @if (message.role === 'bot') {
+              <div class="message__avatar"><app-icon name="robot" [size]="16" /></div>
+            }
+            <div class="message__bubble">{{ message.text }}</div>
+          </div>
+        }
+        @if (isProcessing()) {
+          <div class="message">
+            <div class="message__avatar"><app-icon name="robot" [size]="16" /></div>
+            <div class="message__bubble message__bubble--typing">
+              <span></span><span></span><span></span>
+            </div>
+          </div>
+        }
+        <div #messagesEnd></div>
+      </div>
+
+      @if (stage() === 'chatting') {
+        <div class="chat-input-row">
+          <div class="glow-wrapper" [class.glow-wrapper--active]="isProcessing()">
+            <div class="glow-inner">
+              <textarea
+                [ngModel]="currentInput()"
+                (ngModelChange)="currentInput.set($event)"
+                (keydown.enter)="$event.preventDefault(); sendMessage()"
+                placeholder="e.g. I need 500 double-sided business cards on 300 GSM art paper..."
+                rows="2"
+                [disabled]="isProcessing()">
+              </textarea>
+              <button type="button" class="send-button" (click)="sendMessage()" [disabled]="isProcessing() || !currentInput().trim()">
+                <app-icon name="send" [size]="18" />
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Live specification / review panel -->
+    <div class="summary-panel card">
+      <h2>Your request</h2>
+
+      <div class="summary-field">
+        <span class="summary-field__label">Category</span>
+        <span class="summary-field__value">
+          @if (selectedCategory(); as category) {
+            <span class="capitalize">{{ category.name }}</span>
+          } @else {
+            <span class="pending">Not yet determined</span>
+          }
+        </span>
+      </div>
+
+      @if (editableFields().length === 0) {
+        <p class="empty-hint">Details you mention will appear here as we chat.</p>
+      } @else {
+        @for (field of editableFields(); track field.key) {
+          <div class="summary-field">
+            <span class="summary-field__label">{{ field.label }}</span>
+            @if (stage() === 'reviewing') {
+              <input
+                class="summary-field__input"
+                [value]="field.value"
+                (change)="updateField(field.key, $any($event.target).value)" />
+            } @else {
+              <span class="summary-field__value">{{ field.value }}</span>
+            }
+          </div>
+        }
+      }
+
+      @if (stage() === 'reviewing' || stage() === 'submitting') {
+        @if (priceEstimate(); as price) {
+          <div class="price-box">
+            <span class="price-box__label">Estimated price</span>
+            <span class="price-box__value">LKR {{ price.price_min | number: '1.0-0' }} - {{ price.price_max | number: '1.0-0' }}</span>
+            <button type="button" class="link-button" (click)="fetchPriceEstimate()">Recalculate</button>
+          </div>
+        }
+
+        @if (submitError()) {
+          <p class="form-error">{{ submitError() }}</p>
+        }
+
+        <button
+          type="button"
+          class="button button--primary button--full"
+          [disabled]="stage() === 'submitting'"
+          (click)="submitInquiry()">
+          {{ stage() === 'submitting' ? 'Submitting...' : 'Submit Inquiry' }}
+        </button>
+      }
+
+      @if (stage() === 'submitted') {
+        <div class="success-box">
+          <app-icon name="check" [size]="28" />
+          <p>Your inquiry has been submitted. Print shops can now bid on it.</p>
+          <button type="button" class="button button--primary button--full" (click)="goToDashboard()">
+            Go to Dashboard
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+</div>

@@ -1,0 +1,78 @@
+<div class="page">
+  <div class="page__header">
+    <h1>Dashboard</h1>
+    <p class="page__subtitle">Track inquiries you can bid on and your active orders</p>
+  </div>
+
+  <div class="stat-grid">
+    <app-stat-card
+      label="Open Inquiries"
+      [value]="openInquiriesCount()"
+      subtitle="Matching your categories, not yet bid on"
+      icon="list"
+      iconColor="var(--color-accent)"
+      iconBg="var(--color-accent-soft)" />
+    <app-stat-card
+      label="Pending Bids"
+      [value]="pendingBidsCount()"
+      subtitle="Waiting on customer decision"
+      icon="tag"
+      iconColor="var(--color-warning)"
+      iconBg="var(--color-warning-soft)" />
+    <app-stat-card
+      label="Active Orders"
+      [value]="activeOrdersCount()"
+      subtitle="Currently in production or delivery"
+      icon="package"
+      iconColor="#2a6f97"
+      iconBg="#e8f1f6" />
+    <app-stat-card
+      label="Completed Orders"
+      [value]="completedOrdersCount()"
+      subtitle="Successfully delivered"
+      icon="check"
+      iconColor="var(--color-success)"
+      iconBg="var(--color-success-soft)" />
+  </div>
+
+  <div class="card table-card">
+    <div class="table-card__header">
+      <h2>Recent Open Inquiries</h2>
+      <a routerLink="/print-shop/open-inquiries">View all</a>
+    </div>
+
+    @if (recentInquiries().length === 0) {
+      <app-empty-state
+        icon="list"
+        title="No open inquiries right now"
+        description="New inquiries matching your registered categories will show up here as customers submit them." />
+    } @else {
+      <table>
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Estimated Price</th>
+            <th>Date</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (inquiry of recentInquiries(); track inquiry.id) {
+            <tr>
+              <td class="capitalize">{{ inquiry.print_category }}</td>
+              <td>LKR {{ inquiry.predicted_price_min | number: '1.0-0' }} - {{ inquiry.predicted_price_max | number: '1.0-0' }}</td>
+              <td>{{ inquiry.created_at | date: 'MMM d, y' }}</td>
+              <td>
+                @if (inquiry.already_bid) {
+                  <span class="already-bid">Already bid</span>
+                } @else {
+                  <a [routerLink]="['/print-shop/open-inquiries', inquiry.id]">View &amp; Bid</a>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+</div>
