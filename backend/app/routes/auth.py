@@ -1,0 +1,133 @@
+"""
+Authentication endpoints.
+
+Registration is split into two routes (customer vs print shop) since
+they create different linked profile rows and need different fields -
+keeping them separate is simpler to read than one route branching
+internally on a "role" field from the request body.
+"""
+
+from flask import Blueprint, request, jsonify
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from marshmallow import ValidationError
+
+from app.extensions import db
+from app.models import User, CustomerProfile, PrintShop
+from app.schemas.auth_schema import RegisterCustomerSchema, RegisterPrintShopSchema, LoginSchema
+from app.utils.security import hash_password, verify_password
+
+auth_bp = Blueprint("auth", __name__)
+
+register_customer_schema = RegisterCustomerSchema()
+register_print_shop_schema = RegisterPrintShopSchema()
+login_schema = LoginSchema()
+
+
+@auth_bp.route("/auth/register/customer", methods=["POST"])
+def register_customer():
+    try:
+        data = register_customer_schema.load(request.get_json() or {})
+    except ValidationError as err:
+        return jsonify({"errors": err.messages}), 400
+
+    if User.query.filter_by(email=data["email"]).first():
+        return jsonify({"error": "An account with this email already exists"}), 409
+
+    user = User(
+        email=data["email"],
+        password_hash=hash_password(data["password"]),
+        role="customer",
+        full_name=data["full_name"],
+        phone=data.get("phone"),
+    )
+    db.session.add(user)
+    db.session.flush()  # assigns user.id before the profile row is created
+
+    profile = CustomerProfile(user_id=user.id, default_location=data.get("default_location"))
+    db.session.add(profile)
+    db.session.commit()
+
+    return jsonify({"message": "Customer account created", "user_id": user.id}), 201
+
+
+@auth_bp.route("/auth/register/print-shop", methods=["POST"])
+def register_print_shop():
+    try:
+        data = register_print_shop_schema.load(request.get_json() or {})
+    except ValidationError as err:
+        return jsonify({"errors": err.messages}), 400
+
+    if User.query.filter_by(email=data["email"]).first():
+        return jsonify({"error": "An account with this email already exists"}), 409
+
+    user = User(
+        email=data["email"],
+        password_hash=hash_password(data["password"]),
+        role="print_shop",
+        full_name=data["full_name"],
+        phone=data.get("phone"),
+    )
+    db.session.add(user)
+    db.session.flush()
+
+    shop = PrintShop(
+        user_id=user.id,
+        business_name=data["business_name"],
+        business_address=data.get("business_address"),
+        district=data.get("district"),
+        approval_status="pending",
+    )
+    db.session.add(shop)
+    db.session.commit()
+
+    return jsonify({
+        "message": "Print shop account created, pending admin approval",
+        "user_id": user.id,
+    }), 201
+
+
+@auth_bp.route("/auth/login", methods=["POST"])
+def login():
+    try:
+        data = login_schema.load(request.get_json() or {})
+    except ValidationError as err:
+        return jsonify({"errors": err.messages}), 400
+
+    user = User.query.filter_by(email=data["email"]).first()
+    if not user or not verify_password(data["password"], user.password_hash):
+        # Deliberately the same error for "no such user" and "wrong
+        # password" - confirming which one it was would let someone
+        # probe for which emails are registered.
+        return jsonify({"error": "Invalid email or password"}), 401
+
+    access_token = create_access_token(
+        identity=str(user.id),
+        additional_claims={"role": user.role, "email": user.email},
+    )
+
+    return jsonify({
+        "access_token": access_token,
+        "user": {
+            "id": user.id,
+            "email": user.email,
+            "full_name": user.full_name,
+            "role": user.role,
+        },
+    }), 200
+
+
+@auth_bp.route("/auth/me", methods=["GET"])
+@jwt_required()
+def me():
+    user_id = get_jwt_identity()
+    user = db.session.get(User, int(user_id))
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    return jsonify({
+        "id": user.id,
+        "email": user.email,
+        "full_name": user.full_name,
+        "role": user.role,
+        "phone": user.phone,
+    }), 200
