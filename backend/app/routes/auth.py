@@ -100,6 +100,13 @@ def login():
         # probe for which emails are registered.
         return jsonify({"error": "Invalid email or password"}), 401
 
+    if not user.is_active:
+        # Safe to be specific here, unlike the case above - the
+        # person already proved they know the right email/password,
+        # so saying "suspended" doesn't leak anything new to an
+        # attacker the way confirming account existence would.
+        return jsonify({"error": "This account has been suspended. Contact support for help."}), 403
+
     access_token = create_access_token(
         identity=str(user.id),
         additional_claims={"role": user.role, "email": user.email},

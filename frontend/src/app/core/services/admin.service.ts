@@ -40,4 +40,11 @@ export class AdminService {
       admin_notes: adminNotes,
     });
   }
+
+  updateUserStatus(userId: number, isActive: boolean): Observable<{ id: number; email: string; is_active: boolean }> {
+    return this.http.patch<{ id: number; email: string; is_active: boolean }>(
+      `${this.baseUrl}/admin/users/${userId}/status`,
+      { is_active: isActive },
+    );
+  }
 }

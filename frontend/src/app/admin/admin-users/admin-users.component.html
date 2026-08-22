@@ -11,6 +11,10 @@
     <button type="button" [class.filter-tabs__btn--active]="roleFilter() === 'admin'" class="filter-tabs__btn" (click)="setFilter('admin')">Admins</button>
   </div>
 
+  @if (actionError()) {
+    <p class="form-error">{{ actionError() }}</p>
+  }
+
   <div class="card table-card">
     @if (isLoading()) {
       <p class="loading-state">Loading...</p>
@@ -23,16 +27,33 @@
             <th>Name</th>
             <th>Email</th>
             <th>Role</th>
+            <th>Status</th>
             <th>Joined</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
           @for (user of filteredUsers(); track user.id) {
-            <tr>
+            <tr [class.row--suspended]="!user.is_active">
               <td>{{ user.full_name }}</td>
               <td>{{ user.email }}</td>
               <td><span class="role-badge" [class]="'role-badge--' + user.role">{{ user.role.replace('_', ' ') }}</span></td>
+              <td>
+                <span class="status-badge" [class.status-badge--active]="user.is_active" [class.status-badge--suspended]="!user.is_active">
+                  {{ user.is_active ? 'Active' : 'Suspended' }}
+                </span>
+              </td>
               <td>{{ user.created_at | date: 'MMM d, y' }}</td>
+              <td>
+                <button
+                  type="button"
+                  class="action-btn"
+                  [class.action-btn--reactivate]="!user.is_active"
+                  [disabled]="processingId() === user.id"
+                  (click)="toggleStatus(user)">
+                  {{ user.is_active ? 'Suspend' : 'Reactivate' }}
+                </button>
+              </td>
             </tr>
           }
         </tbody>

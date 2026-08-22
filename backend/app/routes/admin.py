@@ -9,6 +9,7 @@ instruction rather than building a full back-office system.
 from datetime import datetime, timezone
 
 from flask import Blueprint, request, jsonify
+from flask_jwt_extended import get_jwt_identity
 from marshmallow import ValidationError
 
 from app.extensions import db
@@ -31,8 +32,41 @@ def list_users():
         "email": u.email,
         "full_name": u.full_name,
         "role": u.role,
+        "is_active": u.is_active,
         "created_at": u.created_at.isoformat() if u.created_at else None,
     } for u in users]), 200
+
+
+@admin_bp.route("/admin/users/<int:user_id>/status", methods=["PATCH"])
+@role_required("admin")
+def update_user_status(user_id):
+    """
+    Suspends or reactivates any account, regardless of role. Only
+    blocks future logins - an already-issued token keeps working
+    until it expires naturally, since this project doesn't implement
+    token revocation. Fine for the scope here, but worth knowing if
+    this were ever a real production system.
+    """
+    data = request.get_json() or {}
+    is_active = data.get("is_active")
+    if not isinstance(is_active, bool):
+        return jsonify({"error": "is_active must be true or false"}), 400
+
+    user = db.session.get(User, user_id)
+    if user is None:
+        return jsonify({"error": "User not found"}), 404
+
+    if user.id == int(get_jwt_identity()) and not is_active:
+        return jsonify({"error": "You can't suspend your own account"}), 400
+
+    user.is_active = is_active
+    db.session.commit()
+
+    return jsonify({
+        "id": user.id,
+        "email": user.email,
+        "is_active": user.is_active,
+    }), 200
 
 
 @admin_bp.route("/admin/print-shops", methods=["GET"])

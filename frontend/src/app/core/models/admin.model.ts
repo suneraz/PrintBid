@@ -3,6 +3,7 @@ export interface AdminUser {
   email: string;
   full_name: string;
   role: 'customer' | 'print_shop' | 'admin';
+  is_active: boolean;
   created_at: string;
 }
 

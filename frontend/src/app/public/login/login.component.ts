@@ -58,9 +58,13 @@ export class LoginComponent {
         this.isSubmitting.set(false);
         this.router.navigate([this.authService.dashboardPath()]);
       },
-      error: () => {
+      error: (err) => {
         this.isSubmitting.set(false);
-        this.errorMessage.set('Invalid email or password.');
+        // The backend gives a specific, safe-to-show message for a
+        // suspended account (safe because the person already proved
+        // they know the right password) - fall back to a generic
+        // message for everything else, like wrong credentials.
+        this.errorMessage.set(err.error?.error ?? 'Invalid email or password.');
       },
     });
   }

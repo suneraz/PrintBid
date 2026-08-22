@@ -19,6 +19,8 @@ export class AdminUsersComponent implements OnInit {
   users = signal<AdminUser[]>([]);
   isLoading = signal(true);
   roleFilter = signal<RoleFilter>('all');
+  processingId = signal<number | null>(null);
+  actionError = signal<string | null>(null);
 
   filteredUsers = computed(() => {
     const filter = this.roleFilter();
@@ -27,6 +29,10 @@ export class AdminUsersComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    this.loadUsers();
+  }
+
+  private loadUsers(): void {
     this.adminService.listUsers().subscribe({
       next: (data) => {
         this.users.set(data);
@@ -38,5 +44,26 @@ export class AdminUsersComponent implements OnInit {
 
   setFilter(filter: RoleFilter): void {
     this.roleFilter.set(filter);
+  }
+
+  toggleStatus(user: AdminUser): void {
+    const goingActive = !user.is_active;
+    if (!goingActive && !confirm(`Suspend ${user.full_name}? They won't be able to log in until reactivated.`)) {
+      return;
+    }
+
+    this.processingId.set(user.id);
+    this.actionError.set(null);
+
+    this.adminService.updateUserStatus(user.id, goingActive).subscribe({
+      next: () => {
+        this.processingId.set(null);
+        this.loadUsers();
+      },
+      error: (err) => {
+        this.processingId.set(null);
+        this.actionError.set(err.error?.error ?? 'Could not update this user.');
+      },
+    });
   }
 }

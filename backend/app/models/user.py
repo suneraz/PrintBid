@@ -19,6 +19,7 @@ class User(db.Model):
     role = db.Column(db.Enum("customer", "print_shop", "admin", name="user_role"), nullable=False)
     full_name = db.Column(db.String(150), nullable=False)
     phone = db.Column(db.String(20))
+    is_active = db.Column(db.Boolean, default=True, nullable=False)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
