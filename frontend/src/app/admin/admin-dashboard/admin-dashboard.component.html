@@ -33,4 +33,50 @@
       <app-stat-card label="Total Reviews" [value]="s.total_reviews" icon="award" iconColor="var(--color-success)" iconBg="var(--color-success-soft)" />
     </div>
   }
+
+  <div class="section-header">
+    <h2 class="section-title">Manage Users</h2>
+    <a routerLink="/admin/users" class="section-header__link">View all users &rarr;</a>
+  </div>
+  <div class="card table-card">
+    @if (manageableUsers().length === 0) {
+      <p class="empty-note">No customers or print shops yet.</p>
+    } @else {
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (user of manageableUsers(); track user.id) {
+            <tr [class.row--suspended]="!user.is_active">
+              <td>{{ user.full_name }}</td>
+              <td>{{ user.email }}</td>
+              <td><span class="role-badge" [class]="'role-badge--' + user.role">{{ user.role.replace('_', ' ') }}</span></td>
+              <td>
+                <span class="status-badge" [class.status-badge--active]="user.is_active" [class.status-badge--suspended]="!user.is_active">
+                  {{ user.is_active ? 'Active' : 'Suspended' }}
+                </span>
+              </td>
+              <td>
+                <button
+                  type="button"
+                  class="action-btn"
+                  [class.action-btn--reactivate]="!user.is_active"
+                  [disabled]="processingId() === user.id"
+                  (click)="toggleStatus(user)">
+                  {{ user.is_active ? 'Suspend' : 'Reactivate' }}
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
 </div>

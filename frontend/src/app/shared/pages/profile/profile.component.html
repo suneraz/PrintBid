@@ -1,0 +1,41 @@
+<div class="page">
+  <div class="page__header">
+    <h1>My Profile</h1>
+    <p class="page__subtitle">Update your name, phone, and contact details</p>
+  </div>
+
+  @if (isLoading()) {
+    <p class="loading-state">Loading...</p>
+  } @else {
+    <form class="card profile-form" [formGroup]="form" (ngSubmit)="save()">
+      <label>
+        Full name
+        <input type="text" formControlName="full_name" />
+      </label>
+
+      <label>
+        Phone (optional)
+        <input type="tel" formControlName="phone" placeholder="e.g. 077 123 4567" />
+      </label>
+
+      @if (isCustomer) {
+        <label>
+          Default location (optional)
+          <input type="text" formControlName="default_location" placeholder="e.g. Colombo" />
+        </label>
+      }
+
+      @if (saveError()) {
+        <p class="form-error">{{ saveError() }}</p>
+      }
+
+      @if (saved()) {
+        <p class="save-success">Saved.</p>
+      }
+
+      <button type="submit" class="button button--primary" [disabled]="isSaving()">
+        {{ isSaving() ? 'Saving...' : 'Save Changes' }}
+      </button>
+    </form>
+  }
+</div>

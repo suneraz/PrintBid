@@ -131,10 +131,65 @@ def me():
     if not user:
         return jsonify({"error": "User not found"}), 404
 
+    default_location = None
+    if user.role == "customer" and user.customer_profile:
+        default_location = user.customer_profile.default_location
+
     return jsonify({
         "id": user.id,
         "email": user.email,
         "full_name": user.full_name,
         "role": user.role,
         "phone": user.phone,
+        "default_location": default_location,
+    }), 200
+
+
+@auth_bp.route("/auth/me", methods=["PATCH"])
+@jwt_required()
+def update_me():
+    """
+    Profile self-edit, available to every role. Deliberately does not
+    accept email or password here - changing either of those has
+    security implications (re-verification, session invalidation)
+    that are out of scope for this project, so they're left as
+    fixed once an account is created.
+    """
+    user_id = get_jwt_identity()
+    user = db.session.get(User, int(user_id))
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    data = request.get_json() or {}
+
+    if "full_name" in data:
+        full_name = (data["full_name"] or "").strip()
+        if not full_name:
+            return jsonify({"error": "Full name cannot be empty"}), 400
+        user.full_name = full_name
+
+    if "phone" in data:
+        user.phone = (data["phone"] or "").strip() or None
+
+    if "default_location" in data and user.role == "customer":
+        if user.customer_profile is None:
+            # Shouldn't normally happen - every customer gets a
+            # profile row at registration - but guards against it
+            # rather than crashing if one is ever missing.
+            user.customer_profile = CustomerProfile(user_id=user.id)
+        user.customer_profile.default_location = (data["default_location"] or "").strip() or None
+
+    db.session.commit()
+
+    default_location = None
+    if user.role == "customer" and user.customer_profile:
+        default_location = user.customer_profile.default_location
+
+    return jsonify({
+        "id": user.id,
+        "email": user.email,
+        "full_name": user.full_name,
+        "role": user.role,
+        "phone": user.phone,
+        "default_location": default_location,
     }), 200

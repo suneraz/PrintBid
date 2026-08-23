@@ -30,6 +30,7 @@ const NAV_BY_ROLE: Record<UserRole, NavItem[]> = {
     { label: 'New Inquiry', path: '/customer/new-inquiry', icon: 'chat' },
     { label: 'My Inquiries', path: '/customer/inquiries', icon: 'list' },
     { label: 'My Orders', path: '/customer/orders', icon: 'package' },
+    { label: 'My Profile', path: '/profile', icon: 'users' },
   ],
   print_shop: [
     { label: 'Home', path: '/', icon: 'home' },
@@ -37,6 +38,7 @@ const NAV_BY_ROLE: Record<UserRole, NavItem[]> = {
     { label: 'Open Inquiries', path: '/print-shop/open-inquiries', icon: 'list' },
     { label: 'My Bids', path: '/print-shop/bids', icon: 'tag' },
     { label: 'My Orders', path: '/print-shop/orders', icon: 'package' },
+    { label: 'My Profile', path: '/profile', icon: 'users' },
   ],
   admin: [
     { label: 'Home', path: '/', icon: 'home' },
@@ -44,6 +46,7 @@ const NAV_BY_ROLE: Record<UserRole, NavItem[]> = {
     { label: 'Users', path: '/admin/users', icon: 'users' },
     { label: 'Print Shops', path: '/admin/print-shops', icon: 'shop' },
     { label: 'Disputes', path: '/admin/disputes', icon: 'flag' },
+    { label: 'My Profile', path: '/profile', icon: 'users' },
   ],
 };
 

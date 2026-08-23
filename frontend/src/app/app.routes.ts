@@ -17,6 +17,20 @@ export const routes: Routes = [
     loadComponent: () => import('./public/register/register.component').then((m) => m.RegisterComponent),
   },
   {
+    // Reachable by any logged-in role, not nested under a
+    // role-specific block - full_name/phone live on every account
+    // regardless of role, so this one page serves all three.
+    path: 'profile',
+    canActivate: [authGuard],
+    loadComponent: () => import('./shared/components/app-shell/app-shell.component').then((m) => m.AppShellComponent),
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./shared/pages/profile/profile.component').then((m) => m.ProfileComponent),
+      },
+    ],
+  },
+  {
     // Every route nested under here renders inside the AppShell's
     // sidebar layout, and authGuard blocks the whole group if you're
     // not logged in - so individual pages don't need to repeat that check.

@@ -6,6 +6,7 @@ export interface User {
   full_name: string;
   role: UserRole;
   phone?: string;
+  default_location?: string;
 }
 
 export interface LoginResponse {

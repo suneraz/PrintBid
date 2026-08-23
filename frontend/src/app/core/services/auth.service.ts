@@ -93,4 +93,21 @@ export class AuthService {
     if (role === 'admin') return '/admin/dashboard';
     return '/customer/dashboard';
   }
+
+  getMe(): Observable<User> {
+    return this.http.get<User>(`${environment.apiUrl}/auth/me`);
+  }
+
+  updateProfile(data: { full_name?: string; phone?: string; default_location?: string }): Observable<User> {
+    return this.http.patch<User>(`${environment.apiUrl}/auth/me`, data).pipe(
+      tap((updated) => {
+        // Keep localStorage and the shared currentUser signal in
+        // sync, so the sidebar's name/role display and anything else
+        // reading currentUser() reflects the edit immediately without
+        // needing a page refresh or re-login.
+        localStorage.setItem(USER_KEY, JSON.stringify(updated));
+        this.currentUser.set(updated);
+      }),
+    );
+  }
 }
