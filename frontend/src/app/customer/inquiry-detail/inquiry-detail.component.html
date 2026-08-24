@@ -20,6 +20,20 @@
       </div>
     </div>
 
+    @if (inq.attachments.length > 0) {
+      <div class="card attachments-card">
+        <h2>Attached Files</h2>
+        <ul class="attachments-card__list">
+          @for (file of inq.attachments; track file.id) {
+            <li>
+              <span>{{ file.original_filename }}</span>
+              <button type="button" class="link-button" (click)="downloadAttachment(file)">Download</button>
+            </li>
+          }
+        </ul>
+      </div>
+    }
+
     @if (paymentDone()) {
       <div class="card payment-success">
         <app-icon name="check" [size]="28" />
@@ -70,6 +84,17 @@
                 <p class="bid-card__meta">{{ bid.estimated_completion_days }} day turnaround</p>
                 @if (bid.message) {
                   <p class="bid-card__message">"{{ bid.message }}"</p>
+                }
+                @if (bid.portfolio_ids.length > 0) {
+                  <div class="bid-card__portfolio">
+                    @for (portfolioId of bid.portfolio_ids; track portfolioId) {
+                      @if (portfolioThumbnails()[portfolioId]; as thumbUrl) {
+                        <img [src]="thumbUrl" alt="Sample work" class="bid-card__thumbnail" />
+                      } @else {
+                        <div class="bid-card__thumbnail bid-card__thumbnail--loading"></div>
+                      }
+                    }
+                  </div>
                 }
                 <button
                   type="button"

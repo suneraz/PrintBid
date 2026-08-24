@@ -1,0 +1,96 @@
+<div class="page">
+  <div class="page__header">
+    <h1>My Shop</h1>
+    <p class="page__subtitle">Manage the categories you offer and show off your work</p>
+  </div>
+
+  <h2 class="section-title">Printing Services</h2>
+  <div class="card services-card">
+    <p class="services-card__hint">Select every category your shop can produce - customers' inquiries only reach you if they match one of these.</p>
+
+    @if (categoriesError()) {
+      <p class="form-error">{{ categoriesError() }}</p>
+    }
+
+    <div class="category-grid">
+      @for (category of allCategories(); track category.id) {
+        <label class="category-option" [class.category-option--selected]="isSelected(category.id)">
+          <input type="checkbox" [checked]="isSelected(category.id)" (change)="toggleCategory(category.id)" />
+          <span class="capitalize">{{ category.name }}</span>
+        </label>
+      }
+    </div>
+
+    @if (servicesSaved()) {
+      <p class="save-success">Saved.</p>
+    }
+
+    <button type="button" class="button button--primary" [disabled]="isSavingServices()" (click)="saveServices()">
+      {{ isSavingServices() ? 'Saving...' : 'Save Services' }}
+    </button>
+  </div>
+
+  <h2 class="section-title">Portfolio</h2>
+  <div class="card portfolio-card">
+    <p class="portfolio-card__hint">Show customers examples of your previous work - up to 8 images.</p>
+
+    @if (portfolioError()) {
+      <p class="form-error">{{ portfolioError() }}</p>
+    }
+
+    <div class="portfolio-grid">
+      @for (item of portfolioItems(); track item.id) {
+        <div class="portfolio-item">
+          @if (item.objectUrl) {
+            <img [src]="item.objectUrl" [alt]="item.caption ?? 'Portfolio sample'" />
+          } @else {
+            <div class="portfolio-item__loading"></div>
+          }
+          <button type="button" class="portfolio-item__remove" (click)="deletePortfolioItem(item.id)" aria-label="Remove image">&times;</button>
+        </div>
+      }
+
+      @if (portfolioItems().length < 8) {
+        <label class="portfolio-upload" [class.portfolio-upload--busy]="isUploadingPortfolio()">
+          @if (isUploadingPortfolio()) {
+            <span>Uploading...</span>
+          } @else {
+            <span>+ Add image</span>
+          }
+          <input type="file" accept=".jpg,.jpeg,.png" (change)="onPortfolioFileSelected($event)" [disabled]="isUploadingPortfolio()" hidden />
+        </label>
+      }
+    </div>
+  </div>
+
+  <h2 class="section-title">
+    Reviews
+    @if (averageRating(); as avg) {
+      <span class="average-rating">&bigstar; {{ avg | number: '1.1-1' }} ({{ reviews().length }})</span>
+    }
+  </h2>
+  <div class="card reviews-card">
+    @if (reviews().length === 0) {
+      <p class="empty-note">No reviews yet - they'll show up here once customers rate completed orders.</p>
+    } @else {
+      <div class="review-list">
+        @for (review of reviews(); track review.id) {
+          <div class="review-entry">
+            <div class="review-entry__header">
+              <strong>{{ review.customer_name }}</strong>
+              <span class="review-entry__stars">
+                @for (star of [1, 2, 3, 4, 5]; track star) {
+                  <span [class.filled]="star <= review.rating">&bigstar;</span>
+                }
+              </span>
+            </div>
+            @if (review.comment) {
+              <p>{{ review.comment }}</p>
+            }
+            <span class="review-entry__date">{{ review.created_at | date: 'MMM d, y' }}</span>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

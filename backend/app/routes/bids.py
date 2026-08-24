@@ -41,6 +41,7 @@ def _serialize_bid(bid):
         "print_shop_id": bid.print_shop_id,
         "print_shop_name": bid.print_shop.business_name,
         "print_shop_rating": bid.print_shop.rating_average,
+        "portfolio_ids": [p.id for p in bid.print_shop.portfolio_items[:4]],
         "bid_price": bid.bid_price,
         "estimated_completion_days": bid.estimated_completion_days,
         "message": bid.message,
@@ -79,12 +80,15 @@ def list_open_inquiries_for_shop():
 
     already_bid_ids = {b.inquiry_id for b in Bid.query.filter_by(print_shop_id=shop.id).all()}
 
+    # predicted_price_min/max deliberately excluded here - showing
+    # the customer's AI-estimated range to shops would anchor their
+    # bids toward it instead of their own real production cost,
+    # undermining the point of a competitive reverse-bidding system.
+    # The customer sees their own estimate; shops bid blind.
     return jsonify([{
         "id": inq.id,
         "print_category": inq.print_category.name,
         "raw_message": inq.raw_message,
-        "predicted_price_min": inq.predicted_price_min,
-        "predicted_price_max": inq.predicted_price_max,
         "created_at": inq.created_at.isoformat() if inq.created_at else None,
         "already_bid": inq.id in already_bid_ids,
     } for inq in inquiries]), 200

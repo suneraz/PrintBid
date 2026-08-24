@@ -4,6 +4,7 @@ export interface InquirySummary {
   status: 'draft' | 'submitted' | 'closed';
   predicted_price_min: number;
   predicted_price_max: number;
+  bid_count: number;
   created_at: string;
 }
 
@@ -24,6 +25,13 @@ export interface InquirySpecification {
   delivery_method?: string;
 }
 
+export interface InquiryAttachment {
+  id: number;
+  original_filename: string;
+  size_bytes: number;
+  uploaded_at: string;
+}
+
 export interface InquiryDetail {
   id: number;
   print_category: string;
@@ -32,14 +40,13 @@ export interface InquiryDetail {
   predicted_price_min: number;
   predicted_price_max: number;
   specification: InquirySpecification;
+  attachments: InquiryAttachment[];
 }
 
 export interface OpenInquirySummary {
   id: number;
   print_category: string;
   raw_message: string;
-  predicted_price_min: number;
-  predicted_price_max: number;
   created_at: string;
   already_bid: boolean;
 }
@@ -48,10 +55,9 @@ export interface OpenInquiryDetail {
   id: number;
   print_category: string;
   raw_message: string;
-  predicted_price_min: number;
-  predicted_price_max: number;
   already_bid: boolean;
   specification: InquirySpecification;
+  attachments: InquiryAttachment[];
 }
 
 export interface NerExtractResult {

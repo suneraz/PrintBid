@@ -58,7 +58,9 @@
             <th>Category</th>
             <th>Status</th>
             <th>Estimated Price</th>
+            <th>Bids</th>
             <th>Date</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -71,7 +73,15 @@
                 </span>
               </td>
               <td>{{ formatPriceRange(inquiry.predicted_price_min, inquiry.predicted_price_max) }}</td>
+              <td>
+                @if (inquiry.bid_count > 0) {
+                  <span class="bid-badge">{{ inquiry.bid_count }} bid{{ inquiry.bid_count === 1 ? '' : 's' }}</span>
+                } @else {
+                  <span class="bid-badge bid-badge--none">No bids yet</span>
+                }
+              </td>
               <td>{{ inquiry.created_at | date: 'MMM d, y' }}</td>
+              <td><a [routerLink]="['/customer/inquiries', inquiry.id]">View</a></td>
             </tr>
           }
         </tbody>

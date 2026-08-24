@@ -1,0 +1,5 @@
+# Actual uploaded files should never be committed - only the folder
+# structure itself (via .gitkeep) is tracked.
+app/uploads/*
+!app/uploads/.gitkeep
+!app/uploads/**/.gitkeep

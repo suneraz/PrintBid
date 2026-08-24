@@ -31,6 +31,7 @@ class Inquiry(db.Model):
     print_category = db.relationship("PrintCategory")
     specification = db.relationship("InquirySpecification", back_populates="inquiry", uselist=False, cascade="all, delete-orphan")
     bids = db.relationship("Bid", back_populates="inquiry", cascade="all, delete-orphan")
+    attachments = db.relationship("InquiryAttachment", back_populates="inquiry", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<Inquiry {self.id} customer={self.customer_id} status={self.status}>"

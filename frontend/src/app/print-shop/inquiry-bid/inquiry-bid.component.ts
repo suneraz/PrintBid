@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DecimalPipe } from '@angular/common';
 
 import { BidService } from '../../core/services/bid.service';
+import { InquiryService } from '../../core/services/inquiry.service';
 import { OpenInquiryDetail } from '../../core/models/inquiry.model';
 
 @Component({
@@ -17,6 +18,7 @@ export class InquiryBidComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private bidService = inject(BidService);
+  private inquiryService = inject(InquiryService);
   private fb = inject(FormBuilder);
 
   inquiryId = Number(this.route.snapshot.paramMap.get('id'));
@@ -83,5 +85,9 @@ export class InquiryBidComponent implements OnInit {
 
   goToOpenInquiries(): void {
     this.router.navigate(['/print-shop/open-inquiries']);
+  }
+
+  downloadAttachment(file: { id: number; original_filename: string }): void {
+    this.inquiryService.downloadAttachment(file.id, file.original_filename);
   }
 }

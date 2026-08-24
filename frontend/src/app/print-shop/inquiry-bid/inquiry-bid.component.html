@@ -19,11 +19,21 @@
             <span class="spec-item__value">{{ entry[1] }}</span>
           </div>
         }
-        <div class="spec-item">
-          <span class="spec-item__label">customer's estimated range</span>
-          <span class="spec-item__value">LKR {{ inq.predicted_price_min | number: '1.0-0' }} - {{ inq.predicted_price_max | number: '1.0-0' }}</span>
-        </div>
       </div>
+
+      @if (inq.attachments.length > 0) {
+        <div class="card attachments-card">
+          <h2>Customer's Reference Files</h2>
+          <ul class="attachments-card__list">
+            @for (file of inq.attachments; track file.id) {
+              <li>
+                <span>{{ file.original_filename }}</span>
+                <button type="button" class="link-button" (click)="downloadAttachment(file)">Download</button>
+              </li>
+            }
+          </ul>
+        </div>
+      }
 
       @if (submitted()) {
         <div class="card success-box">

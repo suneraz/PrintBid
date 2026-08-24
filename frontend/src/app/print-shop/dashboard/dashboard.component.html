@@ -51,7 +51,6 @@
         <thead>
           <tr>
             <th>Category</th>
-            <th>Estimated Price</th>
             <th>Date</th>
             <th></th>
           </tr>
@@ -60,7 +59,6 @@
           @for (inquiry of recentInquiries(); track inquiry.id) {
             <tr>
               <td class="capitalize">{{ inquiry.print_category }}</td>
-              <td>LKR {{ inquiry.predicted_price_min | number: '1.0-0' }} - {{ inquiry.predicted_price_max | number: '1.0-0' }}</td>
               <td>{{ inquiry.created_at | date: 'MMM d, y' }}</td>
               <td>
                 @if (inquiry.already_bid) {

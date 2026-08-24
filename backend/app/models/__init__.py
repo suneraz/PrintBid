@@ -8,6 +8,7 @@ from app.models.print_shop import PrintShop
 from app.models.print_category import PrintCategory, ShopService
 from app.models.portfolio import Portfolio
 from app.models.inquiry import Inquiry, InquirySpecification
+from app.models.inquiry_attachment import InquiryAttachment
 from app.models.bid import Bid
 from app.models.order import Order, OrderStatusHistory
 from app.models.review import Review

@@ -27,9 +27,6 @@
           </div>
           <p class="inquiry-card__message">{{ inquiry.raw_message }}</p>
           <div class="inquiry-card__footer">
-            <span class="inquiry-card__price">
-              LKR {{ inquiry.predicted_price_min | number: '1.0-0' }} - {{ inquiry.predicted_price_max | number: '1.0-0' }}
-            </span>
             <span class="inquiry-card__date">{{ inquiry.created_at | date: 'MMM d' }}</span>
           </div>
           @if (inquiry.already_bid) {

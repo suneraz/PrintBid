@@ -33,6 +33,17 @@ export class BidService {
     );
   }
 
+  /**
+   * Same reasoning as inquiry attachments and the shop's own
+   * portfolio page - the image route needs the auth token, which a
+   * plain <img src> can't send, so this fetches the bytes through
+   * HttpClient (where the interceptor still applies) and the
+   * component turns it into an object URL.
+   */
+  getPortfolioImageBlob(portfolioId: number): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/print-shops/me/portfolio/${portfolioId}/image`, { responseType: 'blob' });
+  }
+
   simulatePayment(bidId: number): Observable<{ message: string; order: Order }> {
     return this.http.post<{ message: string; order: Order }>(`${this.baseUrl}/bids/${bidId}/simulate-payment`, {});
   }

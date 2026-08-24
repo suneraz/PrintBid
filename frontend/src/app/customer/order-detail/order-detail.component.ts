@@ -1,10 +1,12 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 
 import { OrderService } from '../../core/services/order.service';
 import { ReviewService } from '../../core/services/review.service';
+import { DisputeService } from '../../core/services/dispute.service';
 import { Order, OrderStatus } from '../../core/models/order.model';
+import { Dispute } from '../../core/models/dispute.model';
 import { IconComponent } from '../../shared/components/icon/icon.component';
 
 const ORDER_STAGES: OrderStatus[] = ['Confirmed', 'In Production', 'Ready', 'Dispatched', 'Delivered', 'Completed'];
@@ -20,6 +22,7 @@ export class OrderDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private orderService = inject(OrderService);
   private reviewService = inject(ReviewService);
+  private disputeService = inject(DisputeService);
 
   orderId = Number(this.route.snapshot.paramMap.get('id'));
   order = signal<Order | null>(null);
@@ -31,10 +34,26 @@ export class OrderDetailComponent implements OnInit {
   reviewError = signal<string | null>(null);
   isSubmittingReview = signal(false);
 
+  disputes = signal<Dispute[]>([]);
+  showDisputeForm = signal(false);
+  disputeDescription = signal('');
+  isSubmittingDispute = signal(false);
+  disputeError = signal<string | null>(null);
+
+  // A new dispute can be raised unless there's already one sitting
+  // open - no point letting someone stack up several open reports
+  // about the same order before the first is even looked at.
+  hasOpenDispute = computed(() => this.disputes().some((d) => d.status === 'open'));
+
   ngOnInit(): void {
     this.orderService.listMyOrders().subscribe((orders) => {
       this.order.set(orders.find((o) => o.id === this.orderId) ?? null);
     });
+    this.loadDisputes();
+  }
+
+  private loadDisputes(): void {
+    this.disputeService.listForOrder(this.orderId).subscribe((data) => this.disputes.set(data));
   }
 
   stageState(stage: OrderStatus): 'done' | 'current' | 'pending' {
@@ -64,6 +83,30 @@ export class OrderDetailComponent implements OnInit {
       error: (err) => {
         this.isSubmittingReview.set(false);
         this.reviewError.set(err.error?.error ?? 'Could not submit review.');
+      },
+    });
+  }
+
+  submitDispute(): void {
+    const description = this.disputeDescription().trim();
+    if (!description) {
+      this.disputeError.set('Please describe the issue.');
+      return;
+    }
+
+    this.isSubmittingDispute.set(true);
+    this.disputeError.set(null);
+
+    this.disputeService.raise(this.orderId, description).subscribe({
+      next: () => {
+        this.isSubmittingDispute.set(false);
+        this.disputeDescription.set('');
+        this.showDisputeForm.set(false);
+        this.loadDisputes();
+      },
+      error: (err) => {
+        this.isSubmittingDispute.set(false);
+        this.disputeError.set(err.error?.errors?.description?.[0] ?? err.error?.error ?? 'Could not submit your report.');
       },
     });
   }

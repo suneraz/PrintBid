@@ -56,4 +56,7 @@ def create_app(config_class=Config):
     from app.routes.categories import categories_bp
     app.register_blueprint(categories_bp, url_prefix="/api/v1")
 
+    from app.routes.print_shops import print_shops_bp
+    app.register_blueprint(print_shops_bp, url_prefix="/api/v1")
+
     return app

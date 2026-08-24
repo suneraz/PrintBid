@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DecimalPipe } from '@angular/common';
 
@@ -15,7 +15,7 @@ import { IconComponent } from '../../shared/components/icon/icon.component';
   templateUrl: './inquiry-detail.component.html',
   styleUrl: './inquiry-detail.component.scss',
 })
-export class InquiryDetailComponent implements OnInit {
+export class InquiryDetailComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private inquiryService = inject(InquiryService);
@@ -38,6 +38,12 @@ export class InquiryDetailComponent implements OnInit {
 
   specificationEntries = signal<[string, string | number][]>([]);
 
+  // Maps a portfolio image ID to its loaded object URL, filled in
+  // gradually as each thumbnail's blob arrives - kept outside the
+  // Bid objects themselves since they load asynchronously and at
+  // different times per image.
+  portfolioThumbnails = signal<Record<number, string>>({});
+
   ngOnInit(): void {
     this.inquiryService.getInquiry(this.inquiryId).subscribe((data) => {
       this.inquiry.set(data);
@@ -59,8 +65,30 @@ export class InquiryDetailComponent implements OnInit {
         if (accepted) {
           this.acceptedBid.set(accepted);
         }
+
+        for (const bid of data) {
+          for (const portfolioId of bid.portfolio_ids) {
+            this.loadThumbnail(portfolioId);
+          }
+        }
       },
       error: () => this.isLoading.set(false),
+    });
+  }
+
+  private loadThumbnail(portfolioId: number): void {
+    if (this.portfolioThumbnails()[portfolioId]) return; // already loaded
+
+    this.bidService.getPortfolioImageBlob(portfolioId).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        this.portfolioThumbnails.update((current) => ({ ...current, [portfolioId]: url }));
+      },
+      error: () => {
+        // A missing/broken thumbnail shouldn't block the rest of the
+        // bid card from showing - it just silently has one fewer
+        // sample image, no error state needed for something this minor.
+      },
     });
   }
 
@@ -94,5 +122,15 @@ export class InquiryDetailComponent implements OnInit {
 
   goToOrder(): void {
     this.router.navigate(['/customer/orders']);
+  }
+
+  downloadAttachment(file: { id: number; original_filename: string }): void {
+    this.inquiryService.downloadAttachment(file.id, file.original_filename);
+  }
+
+  ngOnDestroy(): void {
+    for (const url of Object.values(this.portfolioThumbnails())) {
+      URL.revokeObjectURL(url);
+    }
   }
 }

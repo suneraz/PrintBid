@@ -36,3 +36,15 @@ class Config:
     # Angular dev server origin, so the frontend can call this API
     # during development without CORS blocking it.
     CORS_ORIGINS = os.environ.get("CORS_ORIGINS", "http://localhost:4200").split(",")
+
+    # Where uploaded files (inquiry reference images/PDFs, print shop
+    # portfolio samples) get saved on disk. Lives outside app/static
+    # deliberately - these files need access control (only the
+    # owning customer, a shop that can see the inquiry, or an admin),
+    # so they're served through an authenticated route rather than
+    # Flask's static file handler, which would make them world-readable
+    # to anyone with the URL.
+    UPLOAD_FOLDER = os.environ.get(
+        "UPLOAD_FOLDER", os.path.join(os.path.dirname(__file__), "app", "uploads")
+    )
+    MAX_CONTENT_LENGTH = 10 * 1024 * 1024  # 10 MB per request

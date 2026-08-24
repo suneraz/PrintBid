@@ -82,6 +82,33 @@
       }
 
       @if (stage() === 'reviewing' || stage() === 'submitting') {
+        @if (stage() === 'reviewing') {
+          <div class="attachments-box">
+            <span class="attachments-box__label">Attach reference files (optional)</span>
+            <p class="attachments-box__hint">Logos, design references, or layout PDFs - up to 5 files, 8 MB each.</p>
+
+            @if (selectedFiles().length > 0) {
+              <ul class="attachments-list">
+                @for (file of selectedFiles(); track file.name; let i = $index) {
+                  <li>
+                    <span class="attachments-list__name">{{ file.name }}</span>
+                    <button type="button" class="attachments-list__remove" (click)="removeSelectedFile(i)" aria-label="Remove file">&times;</button>
+                  </li>
+                }
+              </ul>
+            }
+
+            @if (fileError()) {
+              <p class="form-error">{{ fileError() }}</p>
+            }
+
+            <label class="attachments-box__upload">
+              + Add file
+              <input type="file" accept=".jpg,.jpeg,.png,.pdf" (change)="onFilesSelected($event)" hidden />
+            </label>
+          </div>
+        }
+
         @if (priceEstimate(); as price) {
           <div class="price-box">
             <span class="price-box__label">Estimated price</span>

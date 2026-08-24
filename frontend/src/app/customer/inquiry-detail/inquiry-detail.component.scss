@@ -30,6 +30,44 @@
   margin-bottom: var(--space-lg);
 }
 
+.attachments-card {
+  padding: var(--space-md);
+  margin-bottom: var(--space-lg);
+
+  h2 { font-size: 1rem; margin: 0 0 var(--space-sm); }
+}
+
+.attachments-card__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+
+  li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--color-pearl);
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.88rem;
+  }
+}
+
+.link-button {
+  background: none;
+  border: none;
+  color: var(--color-accent);
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 0;
+
+  &:hover { text-decoration: underline; }
+}
+
 .spec-item {
   display: flex;
   flex-direction: column;
@@ -109,6 +147,30 @@
   font-style: italic;
   color: var(--color-text-muted);
   margin: 0 0 var(--space-sm);
+}
+
+.bid-card__portfolio {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: var(--space-sm);
+}
+
+.bid-card__thumbnail {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  flex-shrink: 0;
+
+  &--loading {
+    background: var(--color-border);
+    animation: bid-thumb-pulse 1.4s ease-in-out infinite;
+  }
+}
+
+@keyframes bid-thumb-pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
 }
 
 .button--primary {

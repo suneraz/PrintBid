@@ -93,6 +93,10 @@ export const routes: Routes = [
         path: 'orders/:id',
         loadComponent: () => import('./print-shop/shop-order-detail/shop-order-detail.component').then((m) => m.ShopOrderDetailComponent),
       },
+      {
+        path: 'my-shop',
+        loadComponent: () => import('./print-shop/my-shop/my-shop.component').then((m) => m.MyShopComponent),
+      },
     ],
   },
   {

@@ -37,6 +37,47 @@
       }
     </div>
 
+    <h2 class="section-title">Report a Problem</h2>
+    <div class="card dispute-card">
+      @if (disputes().length > 0) {
+        <div class="dispute-history">
+          @for (dispute of disputes(); track dispute.id) {
+            <div class="dispute-entry">
+              <div class="dispute-entry__header">
+                <span class="status-badge" [class]="'status-badge--' + dispute.status">{{ dispute.status }}</span>
+                <span class="dispute-entry__date">{{ dispute.created_at | date: 'MMM d, y' }}</span>
+              </div>
+              <p>{{ dispute.description }}</p>
+              @if (dispute.admin_notes) {
+                <p class="dispute-entry__notes"><strong>Response:</strong> {{ dispute.admin_notes }}</p>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      @if (hasOpenDispute()) {
+        <p class="dispute-hint">You have an open report for this order. We'll get back to you soon.</p>
+      } @else if (showDisputeForm()) {
+        <textarea
+          [value]="disputeDescription()"
+          (input)="disputeDescription.set($any($event.target).value)"
+          placeholder="Describe what went wrong with this order..."
+          rows="3"></textarea>
+        @if (disputeError()) {
+          <p class="form-error">{{ disputeError() }}</p>
+        }
+        <div class="dispute-card__actions">
+          <button type="button" class="button button--primary" [disabled]="isSubmittingDispute()" (click)="submitDispute()">
+            {{ isSubmittingDispute() ? 'Submitting...' : 'Submit Report' }}
+          </button>
+          <button type="button" class="button button--ghost" (click)="showDisputeForm.set(false)">Cancel</button>
+        </div>
+      } @else {
+        <button type="button" class="button button--outline" (click)="showDisputeForm.set(true)">Report a Problem</button>
+      }
+    </div>
+
     @if (order.status === 'Completed') {
       <h2 class="section-title">Leave a review</h2>
       <div class="card review-card">

@@ -150,3 +150,98 @@ textarea {
   &:hover:not(:disabled) { background: var(--color-accent-hover); }
   &:disabled { opacity: 0.6; }
 }
+
+.dispute-card {
+  padding: var(--space-md);
+  margin-bottom: var(--space-lg);
+
+  textarea {
+    width: 100%;
+    font-family: inherit;
+    font-size: 0.9rem;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    resize: vertical;
+    margin-bottom: var(--space-sm);
+
+    &:focus { outline: 2px solid var(--color-accent); outline-offset: 1px; }
+  }
+}
+
+.dispute-history {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.dispute-entry {
+  background: var(--color-pearl);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-sm);
+
+  p { margin: 0.3rem 0 0; font-size: 0.88rem; }
+}
+
+.dispute-entry__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dispute-entry__date {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+
+.dispute-entry__notes {
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.dispute-hint {
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+  margin: 0;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: capitalize;
+
+  &--open { background: var(--color-warning-soft); color: var(--color-warning); }
+  &--resolved { background: var(--color-success-soft); color: var(--color-success); }
+  &--rejected { background: var(--color-danger-soft); color: var(--color-danger); }
+}
+
+.dispute-card__actions {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.button--outline {
+  background: transparent;
+  color: var(--color-danger);
+  border: 1px solid var(--color-danger);
+  padding: 0.6rem 1.25rem;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+
+  &:hover { background: var(--color-danger-soft); }
+}
+
+.button--ghost {
+  background: transparent;
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+  padding: 0.6rem 1.25rem;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+
+  &:hover { background: var(--color-pearl); }
+}

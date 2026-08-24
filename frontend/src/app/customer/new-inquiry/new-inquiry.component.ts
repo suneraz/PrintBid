@@ -108,6 +108,45 @@ export class NewInquiryComponent implements OnInit {
   priceEstimate = signal<{ predicted_price: number; price_min: number; price_max: number } | null>(null);
   submitError = signal<string | null>(null);
 
+  // Files chosen during the review step, held in the browser until
+  // the inquiry itself is created - there's no inquiry ID to attach
+  // them to before that point.
+  selectedFiles = signal<File[]>([]);
+  fileError = signal<string | null>(null);
+
+  private static readonly ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'pdf'];
+  private static readonly MAX_FILE_SIZE_BYTES = 8 * 1024 * 1024;
+  private static readonly MAX_FILES = 5;
+
+  onFilesSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const files = Array.from(input.files ?? []);
+    input.value = ''; // allows selecting the same file again after removing it
+
+    this.fileError.set(null);
+
+    for (const file of files) {
+      if (this.selectedFiles().length >= NewInquiryComponent.MAX_FILES) {
+        this.fileError.set(`You can attach up to ${NewInquiryComponent.MAX_FILES} files.`);
+        break;
+      }
+      const extension = file.name.split('.').pop()?.toLowerCase() ?? '';
+      if (!NewInquiryComponent.ALLOWED_EXTENSIONS.includes(extension)) {
+        this.fileError.set('Only JPG, PNG, and PDF files are accepted.');
+        continue;
+      }
+      if (file.size > NewInquiryComponent.MAX_FILE_SIZE_BYTES) {
+        this.fileError.set('Files must be under 8 MB.');
+        continue;
+      }
+      this.selectedFiles.update((current) => [...current, file]);
+    }
+  }
+
+  removeSelectedFile(index: number): void {
+    this.selectedFiles.update((current) => current.filter((_, i) => i !== index));
+  }
+
   editableFields = computed(() =>
     Object.entries(this.specification()).map(([key, value]) => ({
       key,
@@ -281,14 +320,38 @@ export class NewInquiryComponent implements OnInit {
         ...this.specification(),
       })
       .subscribe({
-        next: () => {
-          this.stage.set('submitted');
-        },
+        next: (inquiry) => this.uploadAttachmentsThenFinish(inquiry.id),
         error: (err) => {
           this.stage.set('reviewing');
           this.submitError.set(err.error?.error ?? 'Could not submit your inquiry. Please try again.');
         },
       });
+  }
+
+  /**
+   * Uploads happen one at a time (not in parallel) purely to keep
+   * this straightforward - inquiries realistically have at most a
+   * handful of attachments, so there's no real performance cost to
+   * doing them sequentially. A failed attachment upload doesn't roll
+   * back the inquiry itself, since the inquiry was already created
+   * successfully and is more important than the reference files.
+   */
+  private uploadAttachmentsThenFinish(inquiryId: number, index = 0): void {
+    const files = this.selectedFiles();
+    if (index >= files.length) {
+      this.stage.set('submitted');
+      return;
+    }
+
+    this.inquiryService.uploadAttachment(inquiryId, files[index]).subscribe({
+      next: () => this.uploadAttachmentsThenFinish(inquiryId, index + 1),
+      error: () => {
+        // Don't block the rest of the submission flow over one
+        // failed file - move on to the next, and the inquiry is
+        // still marked submitted at the end either way.
+        this.uploadAttachmentsThenFinish(inquiryId, index + 1);
+      },
+    });
   }
 
   goToDashboard(): void {
