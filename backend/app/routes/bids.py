@@ -9,15 +9,18 @@ Viewing the ranked bid list is locked to the customer who owns the
 inquiry, same ownership pattern as the inquiries routes.
 """
 
-from flask import Blueprint, request, jsonify
-from flask_jwt_extended import get_jwt_identity
+import os
+
+from flask import Blueprint, request, jsonify, send_file
+from flask_jwt_extended import get_jwt_identity, get_jwt
 from marshmallow import ValidationError
 from sqlalchemy.exc import IntegrityError
 
 from app.extensions import db
-from app.models import Inquiry, Bid, PrintShop, ShopService, CustomerProfile
+from app.models import Inquiry, Bid, PrintShop, ShopService, CustomerProfile, BidAttachment
 from app.schemas.bid_schema import BidCreateSchema
 from app.services.bid_ranking_service import rank_bids
+from app.services.file_upload_service import save_upload, resolve_upload_path, FileUploadError
 from app.utils.decorators import role_required
 
 bids_bp = Blueprint("bids", __name__)
@@ -41,7 +44,10 @@ def _serialize_bid(bid):
         "print_shop_id": bid.print_shop_id,
         "print_shop_name": bid.print_shop.business_name,
         "print_shop_rating": bid.print_shop.rating_average,
-        "portfolio_ids": [p.id for p in bid.print_shop.portfolio_items[:4]],
+        "attachments": [{
+            "id": a.id,
+            "original_filename": a.original_filename,
+        } for a in bid.attachments],
         "bid_price": bid.bid_price,
         "estimated_completion_days": bid.estimated_completion_days,
         "message": bid.message,
@@ -135,6 +141,98 @@ def submit_bid(inquiry_id):
         return jsonify({"error": "You have already submitted a bid on this inquiry"}), 409
 
     return jsonify(_serialize_bid(bid)), 201
+
+
+@bids_bp.route("/bids/<int:bid_id>/attachments", methods=["POST"])
+@role_required("print_shop")
+def upload_bid_attachment(bid_id):
+    shop = _get_current_print_shop()
+    if shop is None:
+        return jsonify({"error": "Print shop profile not found"}), 404
+
+    bid = db.session.get(Bid, bid_id)
+    if bid is None or bid.print_shop_id != shop.id:
+        return jsonify({"error": "Bid not found"}), 404
+
+    if len(bid.attachments) >= 3:
+        return jsonify({"error": "Maximum of 3 sample images per bid."}), 400
+
+    try:
+        saved = save_upload(
+            request.files.get("file"),
+            subfolder=f"bids/{bid.id}",
+            allowed_extensions={"jpg", "jpeg", "png"},
+        )
+    except FileUploadError as err:
+        return jsonify({"error": str(err)}), 400
+
+    attachment = BidAttachment(bid_id=bid.id, **saved)
+    db.session.add(attachment)
+    db.session.commit()
+
+    return jsonify({"id": attachment.id, "original_filename": attachment.original_filename}), 201
+
+
+@bids_bp.route("/bids/<int:bid_id>/attachments/<int:attachment_id>", methods=["DELETE"])
+@role_required("print_shop")
+def delete_bid_attachment(bid_id, attachment_id):
+    shop = _get_current_print_shop()
+    if shop is None:
+        return jsonify({"error": "Print shop profile not found"}), 404
+
+    bid = db.session.get(Bid, bid_id)
+    if bid is None or bid.print_shop_id != shop.id:
+        return jsonify({"error": "Bid not found"}), 404
+
+    attachment = next((a for a in bid.attachments if a.id == attachment_id), None)
+    if attachment is None:
+        return jsonify({"error": "Attachment not found"}), 404
+
+    file_path = resolve_upload_path(f"bids/{bid.id}", attachment.stored_filename)
+    db.session.delete(attachment)
+    db.session.commit()
+
+    if os.path.exists(file_path):
+        os.remove(file_path)
+
+    return jsonify({"message": "Attachment deleted"}), 200
+
+
+@bids_bp.route("/bid-attachments/<int:attachment_id>/image", methods=["GET"])
+@role_required("print_shop", "customer", "admin")
+def get_bid_attachment_image(attachment_id):
+    """
+    Same access pattern as inquiry attachments: the bidding shop
+    (their own upload), the customer who owns the inquiry this bid
+    is on (they need to see it to compare bids), or an admin. Not a
+    free-for-all like the shop's general portfolio - this is scoped
+    to one specific job, so only people involved in that job see it.
+    """
+    attachment = db.session.get(BidAttachment, attachment_id)
+    if attachment is None:
+        return jsonify({"error": "Attachment not found"}), 404
+
+    bid = attachment.bid
+    role = get_jwt().get("role")
+    user_id = int(get_jwt_identity())
+
+    if role == "print_shop":
+        shop = PrintShop.query.filter_by(user_id=user_id).first()
+        allowed = shop is not None and bid.print_shop_id == shop.id
+    elif role == "customer":
+        customer = CustomerProfile.query.filter_by(user_id=user_id).first()
+        allowed = customer is not None and bid.inquiry.customer_id == customer.id
+    else:  # admin
+        allowed = True
+
+    if not allowed:
+        return jsonify({"error": "Attachment not found"}), 404
+
+    file_path = resolve_upload_path(f"bids/{bid.id}", attachment.stored_filename)
+    if not os.path.exists(file_path):
+        return jsonify({"error": "Image is missing from storage"}), 404
+
+    return send_file(file_path)
 
 
 @bids_bp.route("/inquiries/<int:inquiry_id>/bids", methods=["GET"])

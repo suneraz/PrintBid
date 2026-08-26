@@ -61,6 +61,31 @@
             <textarea formControlName="message" rows="3" placeholder="Any details that might help win this job..."></textarea>
           </label>
 
+          <div class="samples-box">
+            <span class="samples-box__label">Sample images (optional)</span>
+            <p class="samples-box__hint">Show a relevant example of your previous work - up to 3 images.</p>
+
+            @if (selectedFiles().length > 0) {
+              <ul class="samples-list">
+                @for (file of selectedFiles(); track file.name; let i = $index) {
+                  <li>
+                    <span class="samples-list__name">{{ file.name }}</span>
+                    <button type="button" class="samples-list__remove" (click)="removeSelectedFile(i)" aria-label="Remove file">&times;</button>
+                  </li>
+                }
+              </ul>
+            }
+
+            @if (fileError()) {
+              <p class="form-error">{{ fileError() }}</p>
+            }
+
+            <label class="samples-box__upload">
+              + Add sample
+              <input type="file" accept=".jpg,.jpeg,.png" (change)="onFilesSelected($event)" hidden />
+            </label>
+          </div>
+
           @if (submitError()) {
             <p class="form-error">{{ submitError() }}</p>
           }

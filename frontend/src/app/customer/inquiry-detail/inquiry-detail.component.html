@@ -85,10 +85,10 @@
                 @if (bid.message) {
                   <p class="bid-card__message">"{{ bid.message }}"</p>
                 }
-                @if (bid.portfolio_ids.length > 0) {
+                @if (bid.attachments.length > 0) {
                   <div class="bid-card__portfolio">
-                    @for (portfolioId of bid.portfolio_ids; track portfolioId) {
-                      @if (portfolioThumbnails()[portfolioId]; as thumbUrl) {
+                    @for (attachment of bid.attachments; track attachment.id) {
+                      @if (portfolioThumbnails()[attachment.id]; as thumbUrl) {
                         <img [src]="thumbUrl" alt="Sample work" class="bid-card__thumbnail" />
                       } @else {
                         <div class="bid-card__thumbnail bid-card__thumbnail--loading"></div>

@@ -31,11 +31,49 @@ export class InquiryBidComponent implements OnInit {
   submitError = signal<string | null>(null);
   submitted = signal(false);
 
+  // Sample images chosen before the bid exists yet - there's no bid
+  // ID to attach them to until submitBid() actually creates it, same
+  // pattern as inquiry attachments on the customer's side.
+  selectedFiles = signal<File[]>([]);
+  fileError = signal<string | null>(null);
+
+  private static readonly MAX_FILES = 3;
+  private static readonly MAX_FILE_SIZE_BYTES = 8 * 1024 * 1024;
+
   form = this.fb.group({
     bid_price: ['', [Validators.required, Validators.min(1)]],
     estimated_completion_days: ['', [Validators.required, Validators.min(1)]],
     message: [''],
   });
+
+  onFilesSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const files = Array.from(input.files ?? []);
+    input.value = '';
+
+    this.fileError.set(null);
+
+    for (const file of files) {
+      if (this.selectedFiles().length >= InquiryBidComponent.MAX_FILES) {
+        this.fileError.set(`You can attach up to ${InquiryBidComponent.MAX_FILES} sample images.`);
+        break;
+      }
+      const extension = file.name.split('.').pop()?.toLowerCase() ?? '';
+      if (!['jpg', 'jpeg', 'png'].includes(extension)) {
+        this.fileError.set('Only JPG and PNG images are accepted.');
+        continue;
+      }
+      if (file.size > InquiryBidComponent.MAX_FILE_SIZE_BYTES) {
+        this.fileError.set('Files must be under 8 MB.');
+        continue;
+      }
+      this.selectedFiles.update((current) => [...current, file]);
+    }
+  }
+
+  removeSelectedFile(index: number): void {
+    this.selectedFiles.update((current) => current.filter((_, i) => i !== index));
+  }
 
   ngOnInit(): void {
     this.bidService.getOpenInquiry(this.inquiryId).subscribe({
@@ -72,15 +110,32 @@ export class InquiryBidComponent implements OnInit {
         message: message || undefined,
       })
       .subscribe({
-        next: () => {
-          this.isSubmitting.set(false);
-          this.submitted.set(true);
-        },
+        next: (bid) => this.uploadSamplesThenFinish(bid.id),
         error: (err) => {
           this.isSubmitting.set(false);
           this.submitError.set(err.error?.error ?? 'Could not submit your bid. Please try again.');
         },
       });
+  }
+
+  /**
+   * Same reasoning as the customer's attachment uploads - one at a
+   * time is plenty for at most 3 images, and a failed sample upload
+   * doesn't roll back the bid itself, since the bid is the important
+   * part and already succeeded.
+   */
+  private uploadSamplesThenFinish(bidId: number, index = 0): void {
+    const files = this.selectedFiles();
+    if (index >= files.length) {
+      this.isSubmitting.set(false);
+      this.submitted.set(true);
+      return;
+    }
+
+    this.bidService.uploadBidAttachment(bidId, files[index]).subscribe({
+      next: () => this.uploadSamplesThenFinish(bidId, index + 1),
+      error: () => this.uploadSamplesThenFinish(bidId, index + 1),
+    });
   }
 
   goToOpenInquiries(): void {

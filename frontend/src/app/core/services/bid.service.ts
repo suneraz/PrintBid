@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
-import { Bid } from '../models/bid.model';
+import { Bid, BidAttachment } from '../models/bid.model';
 import { Order } from '../models/order.model';
 import { OpenInquirySummary, OpenInquiryDetail } from '../models/inquiry.model';
 
@@ -40,8 +40,8 @@ export class BidService {
    * HttpClient (where the interceptor still applies) and the
    * component turns it into an object URL.
    */
-  getPortfolioImageBlob(portfolioId: number): Observable<Blob> {
-    return this.http.get(`${this.baseUrl}/print-shops/me/portfolio/${portfolioId}/image`, { responseType: 'blob' });
+  getBidAttachmentImageBlob(attachmentId: number): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/bid-attachments/${attachmentId}/image`, { responseType: 'blob' });
   }
 
   simulatePayment(bidId: number): Observable<{ message: string; order: Order }> {
@@ -60,6 +60,12 @@ export class BidService {
 
   submitBid(inquiryId: number, data: { bid_price: number; estimated_completion_days: number; message?: string }): Observable<Bid> {
     return this.http.post<Bid>(`${this.baseUrl}/inquiries/${inquiryId}/bids`, data);
+  }
+
+  uploadBidAttachment(bidId: number, file: File): Observable<BidAttachment> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<BidAttachment>(`${this.baseUrl}/bids/${bidId}/attachments`, formData);
   }
 
   listMyBids(): Observable<MyBidSummary[]> {

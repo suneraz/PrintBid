@@ -26,6 +26,7 @@ class Bid(db.Model):
     inquiry = db.relationship("Inquiry", back_populates="bids")
     print_shop = db.relationship("PrintShop", back_populates="bids")
     order = db.relationship("Order", back_populates="bid", uselist=False)
+    attachments = db.relationship("BidAttachment", back_populates="bid", cascade="all, delete-orphan")
 
     __table_args__ = (
         db.UniqueConstraint("inquiry_id", "print_shop_id", name="uq_inquiry_shop_bid"),

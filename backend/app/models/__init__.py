@@ -10,6 +10,7 @@ from app.models.portfolio import Portfolio
 from app.models.inquiry import Inquiry, InquirySpecification
 from app.models.inquiry_attachment import InquiryAttachment
 from app.models.bid import Bid
+from app.models.bid_attachment import BidAttachment
 from app.models.order import Order, OrderStatusHistory
 from app.models.review import Review
 from app.models.dispute import Dispute

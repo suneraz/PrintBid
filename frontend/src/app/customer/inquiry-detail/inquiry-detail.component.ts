@@ -67,8 +67,8 @@ export class InquiryDetailComponent implements OnInit, OnDestroy {
         }
 
         for (const bid of data) {
-          for (const portfolioId of bid.portfolio_ids) {
-            this.loadThumbnail(portfolioId);
+          for (const attachment of bid.attachments) {
+            this.loadThumbnail(attachment.id);
           }
         }
       },
@@ -76,13 +76,13 @@ export class InquiryDetailComponent implements OnInit, OnDestroy {
     });
   }
 
-  private loadThumbnail(portfolioId: number): void {
-    if (this.portfolioThumbnails()[portfolioId]) return; // already loaded
+  private loadThumbnail(attachmentId: number): void {
+    if (this.portfolioThumbnails()[attachmentId]) return; // already loaded
 
-    this.bidService.getPortfolioImageBlob(portfolioId).subscribe({
+    this.bidService.getBidAttachmentImageBlob(attachmentId).subscribe({
       next: (blob) => {
         const url = URL.createObjectURL(blob);
-        this.portfolioThumbnails.update((current) => ({ ...current, [portfolioId]: url }));
+        this.portfolioThumbnails.update((current) => ({ ...current, [attachmentId]: url }));
       },
       error: () => {
         // A missing/broken thumbnail shouldn't block the rest of the
