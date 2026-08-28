@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
-import { AdminUser, AdminPrintShop, AdminDispute, PlatformStats } from '../models/admin.model';
+import { AdminUser, AdminPrintShop, AdminDispute, AdminInquiry, AdminBid, AdminOrder, PlatformStats } from '../models/admin.model';
 
 @Injectable({ providedIn: 'root' })
 export class AdminService {
@@ -46,5 +46,17 @@ export class AdminService {
       `${this.baseUrl}/admin/users/${userId}/status`,
       { is_active: isActive },
     );
+  }
+
+  listAllInquiries(): Observable<AdminInquiry[]> {
+    return this.http.get<AdminInquiry[]>(`${this.baseUrl}/admin/inquiries`);
+  }
+
+  listAllBids(): Observable<AdminBid[]> {
+    return this.http.get<AdminBid[]>(`${this.baseUrl}/admin/bids`);
+  }
+
+  listAllOrders(): Observable<AdminOrder[]> {
+    return this.http.get<AdminOrder[]>(`${this.baseUrl}/admin/orders`);
   }
 }

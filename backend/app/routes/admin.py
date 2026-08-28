@@ -137,6 +137,21 @@ def list_all_orders():
     } for o in orders]), 200
 
 
+@admin_bp.route("/admin/bids", methods=["GET"])
+@role_required("admin")
+def list_all_bids():
+    bids = Bid.query.order_by(Bid.created_at.desc()).all()
+    return jsonify([{
+        "id": b.id,
+        "print_shop_name": b.print_shop.business_name,
+        "print_category": b.inquiry.print_category.name if b.inquiry else None,
+        "bid_price": b.bid_price,
+        "estimated_completion_days": b.estimated_completion_days,
+        "status": b.status,
+        "created_at": b.created_at.isoformat() if b.created_at else None,
+    } for b in bids]), 200
+
+
 @admin_bp.route("/admin/disputes", methods=["GET"])
 @role_required("admin")
 def list_all_disputes():

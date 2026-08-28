@@ -124,6 +124,10 @@ export const routes: Routes = [
         path: 'categories',
         loadComponent: () => import('./admin/admin-categories/admin-categories.component').then((m) => m.AdminCategoriesComponent),
       },
+      {
+        path: 'activity',
+        loadComponent: () => import('./admin/admin-activity/admin-activity.component').then((m) => m.AdminActivityComponent),
+      },
     ],
   },
 ];

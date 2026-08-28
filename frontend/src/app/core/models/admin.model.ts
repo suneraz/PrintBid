@@ -27,6 +27,32 @@ export interface AdminDispute {
   created_at: string;
 }
 
+export interface AdminInquiry {
+  id: number;
+  customer_email: string;
+  print_category: string;
+  status: 'draft' | 'submitted' | 'closed';
+  created_at: string;
+}
+
+export interface AdminBid {
+  id: number;
+  print_shop_name: string;
+  print_category: string;
+  bid_price: number;
+  estimated_completion_days: number;
+  status: 'pending' | 'accepted' | 'rejected';
+  created_at: string;
+}
+
+export interface AdminOrder {
+  id: number;
+  customer_email: string;
+  print_shop_name: string;
+  status: string;
+  created_at: string;
+}
+
 export interface PlatformStats {
   total_users: number;
   total_customers: number;

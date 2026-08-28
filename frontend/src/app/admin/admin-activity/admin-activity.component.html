@@ -1,0 +1,80 @@
+<div class="page">
+  <div class="page__header">
+    <h1>Platform Activity</h1>
+    <p class="page__subtitle">Every inquiry, bid, and order on PrintBid - read-only oversight</p>
+  </div>
+
+  <div class="filter-tabs">
+    <button type="button" [class.filter-tabs__btn--active]="activeTab() === 'inquiries'" class="filter-tabs__btn" (click)="setTab('inquiries')">Inquiries</button>
+    <button type="button" [class.filter-tabs__btn--active]="activeTab() === 'bids'" class="filter-tabs__btn" (click)="setTab('bids')">Bids</button>
+    <button type="button" [class.filter-tabs__btn--active]="activeTab() === 'orders'" class="filter-tabs__btn" (click)="setTab('orders')">Orders</button>
+  </div>
+
+  <div class="card table-card">
+    @if (isLoading()) {
+      <p class="loading-state">Loading...</p>
+    } @else if (activeTab() === 'inquiries') {
+      @if (inquiries().length === 0) {
+        <p class="loading-state">No inquiries yet.</p>
+      } @else {
+        <table>
+          <thead>
+            <tr><th>Customer</th><th>Category</th><th>Status</th><th>Date</th></tr>
+          </thead>
+          <tbody>
+            @for (inq of inquiries(); track inq.id) {
+              <tr>
+                <td>{{ inq.customer_email }}</td>
+                <td class="capitalize">{{ inq.print_category }}</td>
+                <td><span class="status-badge" [class]="'status-badge--' + inq.status">{{ inq.status }}</span></td>
+                <td>{{ inq.created_at | date: 'MMM d, y' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    } @else if (activeTab() === 'bids') {
+      @if (bids().length === 0) {
+        <p class="loading-state">No bids yet.</p>
+      } @else {
+        <table>
+          <thead>
+            <tr><th>Print Shop</th><th>Category</th><th>Price</th><th>Turnaround</th><th>Status</th><th>Date</th></tr>
+          </thead>
+          <tbody>
+            @for (bid of bids(); track bid.id) {
+              <tr>
+                <td>{{ bid.print_shop_name }}</td>
+                <td class="capitalize">{{ bid.print_category }}</td>
+                <td>LKR {{ bid.bid_price | number: '1.0-0' }}</td>
+                <td>{{ bid.estimated_completion_days }} days</td>
+                <td><span class="status-badge" [class]="'status-badge--' + bid.status">{{ bid.status }}</span></td>
+                <td>{{ bid.created_at | date: 'MMM d, y' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    } @else {
+      @if (orders().length === 0) {
+        <p class="loading-state">No orders yet.</p>
+      } @else {
+        <table>
+          <thead>
+            <tr><th>Customer</th><th>Print Shop</th><th>Status</th><th>Date</th></tr>
+          </thead>
+          <tbody>
+            @for (order of orders(); track order.id) {
+              <tr>
+                <td>{{ order.customer_email }}</td>
+                <td>{{ order.print_shop_name }}</td>
+                <td><span class="status-badge status-badge--order">{{ order.status }}</span></td>
+                <td>{{ order.created_at | date: 'MMM d, y' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    }
+  </div>
+</div>
