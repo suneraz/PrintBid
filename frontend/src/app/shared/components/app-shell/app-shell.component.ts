@@ -47,6 +47,7 @@ const NAV_BY_ROLE: Record<UserRole, NavItem[]> = {
     { label: 'Users', path: '/admin/users', icon: 'users' },
     { label: 'Print Shops', path: '/admin/print-shops', icon: 'shop' },
     { label: 'Disputes', path: '/admin/disputes', icon: 'flag' },
+    { label: 'Categories', path: '/admin/categories', icon: 'tag' },
     { label: 'My Profile', path: '/profile', icon: 'users' },
   ],
 };

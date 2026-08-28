@@ -120,6 +120,10 @@ export const routes: Routes = [
         path: 'disputes',
         loadComponent: () => import('./admin/admin-disputes/admin-disputes.component').then((m) => m.AdminDisputesComponent),
       },
+      {
+        path: 'categories',
+        loadComponent: () => import('./admin/admin-categories/admin-categories.component').then((m) => m.AdminCategoriesComponent),
+      },
     ],
   },
 ];

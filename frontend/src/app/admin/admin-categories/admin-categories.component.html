@@ -1,0 +1,68 @@
+<div class="page">
+  <div class="page__header">
+    <h1>Print Categories</h1>
+    <p class="page__subtitle">These are the job types customers and print shops both work from - keep names matching what the AI models were trained on</p>
+  </div>
+
+  <div class="card add-card">
+    <h2>Add a category</h2>
+    <div class="add-card__row">
+      <input type="text" [(ngModel)]="newName" placeholder="Category name (e.g. business cards)" />
+      <input type="text" [(ngModel)]="newDescription" placeholder="Description (optional)" />
+      <button type="button" class="button button--primary" [disabled]="isCreating() || !newName().trim()" (click)="createCategory()">
+        {{ isCreating() ? 'Adding...' : 'Add' }}
+      </button>
+    </div>
+    @if (createError()) {
+      <p class="form-error">{{ createError() }}</p>
+    }
+  </div>
+
+  <div class="card table-card">
+    @if (isLoading()) {
+      <p class="loading-state">Loading...</p>
+    } @else if (categories().length === 0) {
+      <p class="loading-state">No categories yet - add one above.</p>
+    } @else {
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Shops Offering</th>
+            <th>Inquiries</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (cat of categories(); track cat.id) {
+            <tr>
+              @if (editingId() === cat.id) {
+                <td><input type="text" [(ngModel)]="editName" class="inline-input" /></td>
+                <td><input type="text" [(ngModel)]="editDescription" class="inline-input" placeholder="Description" /></td>
+                <td>{{ cat.shop_count }}</td>
+                <td>{{ cat.inquiry_count }}</td>
+                <td class="actions">
+                  <button type="button" class="link-button" [disabled]="isSaving()" (click)="saveEdit(cat.id)">Save</button>
+                  <button type="button" class="link-button link-button--muted" (click)="cancelEdit()">Cancel</button>
+                </td>
+              } @else {
+                <td class="capitalize">{{ cat.name }}</td>
+                <td class="muted">{{ cat.description || '—' }}</td>
+                <td>{{ cat.shop_count }}</td>
+                <td>{{ cat.inquiry_count }}</td>
+                <td class="actions">
+                  <button type="button" class="link-button" (click)="startEdit(cat)">Edit</button>
+                  <button type="button" class="link-button link-button--danger" (click)="deleteCategory(cat)">Delete</button>
+                </td>
+              }
+            </tr>
+            @if (editingId() === cat.id && editError()) {
+              <tr><td colspan="5"><p class="form-error">{{ editError() }}</p></td></tr>
+            }
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+</div>
