@@ -41,6 +41,10 @@
           </button>
         </div>
       </div>
+    } @else if (awaitingCustomerConfirmation()) {
+      <div class="card action-card action-card--waiting">
+        <p>Delivered. Waiting on the customer to confirm they've received it - the order will move to Completed once they do.</p>
+      </div>
     }
 
     <h2 class="section-title">Status history</h2>

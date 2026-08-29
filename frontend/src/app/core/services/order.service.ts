@@ -23,4 +23,8 @@ export class OrderService {
   updateOrderStatus(orderId: number, status: OrderStatus, note?: string): Observable<Order> {
     return this.http.patch<Order>(`${this.baseUrl}/orders/${orderId}/status`, { status, note });
   }
+
+  confirmCompletion(orderId: number): Observable<Order> {
+    return this.http.post<Order>(`${this.baseUrl}/orders/${orderId}/confirm-completion`, {});
+  }
 }

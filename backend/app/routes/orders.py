@@ -165,6 +165,13 @@ def update_order_status(order_id):
     except ValidationError as err:
         return jsonify({"errors": err.messages}), 400
 
+    # Marking an order "Completed" is deliberately not something a
+    # shop can do on its own - the customer confirms that separately
+    # once it's actually been delivered, via /confirm-completion below.
+    # A shop can still take an order all the way to "Delivered".
+    if data["status"] == "Completed":
+        return jsonify({"error": "Only the customer can confirm an order as completed."}), 400
+
     shop = _get_current_print_shop()
     if shop is None:
         return jsonify({"error": "Print shop profile not found"}), 404
@@ -178,7 +185,40 @@ def update_order_status(order_id):
         order_id=order.id, status=data["status"], note=data.get("note"),
     ))
 
-    if data["status"] == "Completed":
+    db.session.commit()
+
+    return jsonify(_serialize_order(order)), 200
+
+
+@orders_bp.route("/orders/<int:order_id>/confirm-completion", methods=["POST"])
+@role_required("customer")
+def confirm_order_completion(order_id):
+    """
+    The customer's counterpart to the shop's status updates above -
+    only they can move an order into its final "Completed" state,
+    and only once the shop has actually marked it Delivered. This is
+    what step 18 of the workflow ("customer confirms completion")
+    actually means: a real handoff, not the shop unilaterally closing
+    its own order out.
+    """
+    customer = _get_current_customer_profile()
+    if customer is None:
+        return jsonify({"error": "Customer profile not found"}), 404
+
+    order = db.session.get(Order, order_id)
+    if order is None or order.customer_id != customer.id:
+        return jsonify({"error": "Order not found"}), 404
+
+    if order.status != "Delivered":
+        return jsonify({"error": "This order hasn't been marked as delivered yet."}), 400
+
+    order.status = "Completed"
+    db.session.add(OrderStatusHistory(
+        order_id=order.id, status="Completed", note="Confirmed by customer",
+    ))
+
+    shop = db.session.get(PrintShop, order.print_shop_id)
+    if shop is not None:
         shop.completed_orders_count = (shop.completed_orders_count or 0) + 1
 
     db.session.commit()

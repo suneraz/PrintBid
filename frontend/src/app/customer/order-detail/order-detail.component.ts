@@ -40,16 +40,47 @@ export class OrderDetailComponent implements OnInit {
   isSubmittingDispute = signal(false);
   disputeError = signal<string | null>(null);
 
+  isConfirmingCompletion = signal(false);
+  confirmError = signal<string | null>(null);
+
+  // The customer's own confirmation step, separate from the shop's
+  // status updates - only shown once the shop has actually marked
+  // the order Delivered, since confirming before then wouldn't mean
+  // anything.
+  canConfirmCompletion = computed(() => this.order()?.status === 'Delivered');
+
   // A new dispute can be raised unless there's already one sitting
   // open - no point letting someone stack up several open reports
   // about the same order before the first is even looked at.
   hasOpenDispute = computed(() => this.disputes().some((d) => d.status === 'open'));
 
   ngOnInit(): void {
+    this.loadOrder();
+    this.loadDisputes();
+  }
+
+  private loadOrder(): void {
     this.orderService.listMyOrders().subscribe((orders) => {
       this.order.set(orders.find((o) => o.id === this.orderId) ?? null);
     });
-    this.loadDisputes();
+  }
+
+  confirmCompletion(): void {
+    if (!confirm("Confirm you've received this order? This closes it out and unlocks leaving a review.")) return;
+
+    this.isConfirmingCompletion.set(true);
+    this.confirmError.set(null);
+
+    this.orderService.confirmCompletion(this.orderId).subscribe({
+      next: () => {
+        this.isConfirmingCompletion.set(false);
+        this.loadOrder();
+      },
+      error: (err) => {
+        this.isConfirmingCompletion.set(false);
+        this.confirmError.set(err.error?.error ?? 'Could not confirm completion.');
+      },
+    });
   }
 
   private loadDisputes(): void {

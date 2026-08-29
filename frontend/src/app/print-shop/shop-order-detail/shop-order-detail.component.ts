@@ -28,13 +28,19 @@ export class ShopOrderDetailComponent implements OnInit {
   note = signal('');
 
   // The one obvious next step, if there is one - null once the order
-  // has reached a terminal state (Completed or Cancelled).
+  // reaches Delivered (the shop's part is done at that point; only
+  // the customer can take it to Completed from here) or a terminal
+  // state (Completed or Cancelled).
   nextStage = computed<OrderStatus | null>(() => {
     const order = this.order();
-    if (!order || order.status === 'Cancelled' || order.status === 'Completed') return null;
+    if (!order || ['Cancelled', 'Completed', 'Delivered'].includes(order.status)) return null;
     const currentIndex = this.stages.indexOf(order.status);
     return this.stages[currentIndex + 1] ?? null;
   });
+
+  // Shown once the shop has done everything it can - waiting on the
+  // customer to confirm receipt before the order is truly finished.
+  awaitingCustomerConfirmation = computed(() => this.order()?.status === 'Delivered');
 
   ngOnInit(): void {
     this.loadOrder();

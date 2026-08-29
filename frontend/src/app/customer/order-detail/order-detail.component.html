@@ -24,6 +24,19 @@
       </div>
     }
 
+    @if (canConfirmCompletion()) {
+      <div class="card confirm-card">
+        <h2>Received your order?</h2>
+        <p class="confirm-card__hint">The print shop has marked this as delivered. Confirm once you've actually received it - this closes the order and unlocks leaving a review.</p>
+        @if (confirmError()) {
+          <p class="form-error">{{ confirmError() }}</p>
+        }
+        <button type="button" class="button button--primary" [disabled]="isConfirmingCompletion()" (click)="confirmCompletion()">
+          {{ isConfirmingCompletion() ? 'Confirming...' : 'Confirm Completion' }}
+        </button>
+      </div>
+    }
+
     <h2 class="section-title">Status history</h2>
     <div class="card history-card">
       @for (entry of order.status_history; track $index) {
