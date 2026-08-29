@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
-import { AdminUser, AdminPrintShop, AdminDispute, AdminInquiry, AdminBid, AdminOrder, PlatformStats } from '../models/admin.model';
+import { AdminUser, AdminPrintShop, AdminDispute, AdminInquiry, AdminBid, AdminOrder, AdminReview, PlatformStats } from '../models/admin.model';
 
 @Injectable({ providedIn: 'root' })
 export class AdminService {
@@ -58,5 +58,9 @@ export class AdminService {
 
   listAllOrders(): Observable<AdminOrder[]> {
     return this.http.get<AdminOrder[]>(`${this.baseUrl}/admin/orders`);
+  }
+
+  listAllReviews(): Observable<AdminReview[]> {
+    return this.http.get<AdminReview[]>(`${this.baseUrl}/admin/reviews`);
   }
 }

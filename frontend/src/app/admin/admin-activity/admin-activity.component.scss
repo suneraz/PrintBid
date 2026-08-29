@@ -68,3 +68,17 @@ td {
   &--rejected { background: var(--color-danger-soft); color: var(--color-danger); }
   &--order { background: var(--color-accent-soft); color: var(--color-accent); }
 }
+
+.star {
+  color: var(--color-border);
+  font-size: 0.9rem;
+
+  &--filled { color: var(--color-warning); }
+}
+
+.comment-cell {
+  max-width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

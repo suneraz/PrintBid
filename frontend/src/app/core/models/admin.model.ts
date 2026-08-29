@@ -53,6 +53,16 @@ export interface AdminOrder {
   created_at: string;
 }
 
+export interface AdminReview {
+  id: number;
+  order_id: number;
+  customer_name: string;
+  print_shop_name: string;
+  rating: number;
+  comment: string | null;
+  created_at: string;
+}
+
 export interface PlatformStats {
   total_users: number;
   total_customers: number;

@@ -172,6 +172,21 @@ def list_all_disputes():
     } for d in disputes]), 200
 
 
+@admin_bp.route("/admin/reviews", methods=["GET"])
+@role_required("admin")
+def list_all_reviews():
+    reviews = Review.query.order_by(Review.created_at.desc()).all()
+    return jsonify([{
+        "id": r.id,
+        "order_id": r.order_id,
+        "customer_name": r.customer.user.full_name if r.customer and r.customer.user else None,
+        "print_shop_name": r.print_shop.business_name if r.print_shop else None,
+        "rating": r.rating,
+        "comment": r.comment,
+        "created_at": r.created_at.isoformat() if r.created_at else None,
+    } for r in reviews]), 200
+
+
 @admin_bp.route("/admin/disputes/<int:dispute_id>", methods=["PATCH"])
 @role_required("admin")
 def resolve_dispute(dispute_id):
