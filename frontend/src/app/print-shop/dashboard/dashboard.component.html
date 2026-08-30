@@ -8,7 +8,7 @@
     <app-stat-card
       label="Open Inquiries"
       [value]="openInquiriesCount()"
-      subtitle="Matching your categories, not yet bid on"
+      subtitle="Open jobs, not yet bid on"
       icon="list"
       iconColor="var(--color-accent)"
       iconBg="var(--color-accent-soft)" />
@@ -45,7 +45,7 @@
       <app-empty-state
         icon="list"
         title="No open inquiries right now"
-        description="New inquiries matching your registered categories will show up here as customers submit them." />
+        description="New inquiries will show up here as customers submit them." />
     } @else {
       <table>
         <thead>

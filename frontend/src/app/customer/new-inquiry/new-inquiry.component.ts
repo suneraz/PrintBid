@@ -219,9 +219,13 @@ export class NewInquiryComponent implements OnInit {
       this.messages.update((m) => [...m, { role: 'bot', text: missing.question }]);
       this.scrollToBottom();
     } else {
-      this.messages.update((m) => [...m, { role: 'bot', text: "Great, I have everything I need. Let me work out a price estimate..." }]);
+      // Deliberately doesn't auto-fetch a price here - the customer
+      // reviews/edits their details first and predicts on demand via
+      // the button in the review panel, rather than a number
+      // appearing before they've had a chance to look anything over.
+      this.messages.update((m) => [...m, { role: 'bot', text: "Great, I have everything I need. Review the details below, then predict your price when you're ready." }]);
       this.scrollToBottom();
-      this.fetchPriceEstimate();
+      this.stage.set('reviewing');
     }
   }
 

@@ -16,7 +16,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from marshmallow import ValidationError
 
 from app.extensions import db
-from app.models import Inquiry, InquirySpecification, CustomerProfile, PrintCategory, InquiryAttachment
+from app.models import Inquiry, InquirySpecification, CustomerProfile, PrintCategory, InquiryAttachment, PrintShop
 from app.schemas.inquiry_schema import InquiryCreateSchema
 from app.services import price_service
 from app.services.file_upload_service import save_upload, resolve_upload_path, FileUploadError
@@ -226,13 +226,15 @@ def download_inquiry_attachment(attachment_id):
         customer = CustomerProfile.query.filter_by(user_id=user_id).first()
         allowed = customer is not None and inquiry.customer_id == customer.id
     elif role == "print_shop":
-        from app.models import PrintShop
         shop = PrintShop.query.filter_by(user_id=user_id).first()
-        category_ids = [s.print_category_id for s in shop.services] if shop else []
         already_bid = shop is not None and any(b.print_shop_id == shop.id for b in inquiry.bids)
-        allowed = shop is not None and (
-            (inquiry.status == "submitted" and inquiry.print_category_id in category_ids) or already_bid
-        )
+        # Any approved shop can see any open inquiry's attachments now
+        # that category-based filtering has been removed - a shop
+        # decides for itself whether a job is relevant, so it needs
+        # to see the reference files to make that call in the first
+        # place, not just for inquiries it already declared itself
+        # able to handle.
+        allowed = shop is not None and (inquiry.status == "submitted" or already_bid)
     else:  # admin
         allowed = True
 
@@ -277,19 +279,16 @@ def get_open_inquiry_for_shop(inquiry_id):
     A shop's own view of a single inquiry - deliberately separate
     from the customer-facing get_inquiry above, since the access
     rule is different: not "do you own this", but "is this still
-    open, and does it match something your shop registered for".
+    open" - category no longer gates visibility, a shop judges for
+    itself whether a job is relevant.
     """
-    from app.models import PrintShop
-
     user_id = int(get_jwt_identity())
     shop = PrintShop.query.filter_by(user_id=user_id).first()
     if shop is None:
         return jsonify({"error": "Print shop profile not found"}), 404
 
-    category_ids = [s.print_category_id for s in shop.services]
-
     inquiry = db.session.get(Inquiry, inquiry_id)
-    if inquiry is None or inquiry.status != "submitted" or inquiry.print_category_id not in category_ids:
+    if inquiry is None or inquiry.status != "submitted":
         return jsonify({"error": "Inquiry not found"}), 404
 
     already_bid = any(b.print_shop_id == shop.id for b in inquiry.bids)

@@ -128,6 +128,10 @@
             <span class="price-box__value">LKR {{ price.price_min | number: '1.0-0' }} - {{ price.price_max | number: '1.0-0' }}</span>
             <button type="button" class="link-button" (click)="fetchPriceEstimate()">Recalculate</button>
           </div>
+        } @else {
+          <button type="button" class="button button--outline predict-price-btn" [disabled]="isProcessing()" (click)="fetchPriceEstimate()">
+            {{ isProcessing() ? 'Calculating...' : 'Predict Price' }}
+          </button>
         }
 
         @if (submitError()) {

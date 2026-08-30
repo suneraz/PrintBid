@@ -17,7 +17,7 @@ from marshmallow import ValidationError
 from sqlalchemy.exc import IntegrityError
 
 from app.extensions import db
-from app.models import Inquiry, Bid, PrintShop, ShopService, CustomerProfile, BidAttachment
+from app.models import Inquiry, Bid, PrintShop, CustomerProfile, BidAttachment
 from app.schemas.bid_schema import BidCreateSchema
 from app.services.bid_ranking_service import rank_bids
 from app.services.file_upload_service import save_upload, resolve_upload_path, FileUploadError
@@ -61,11 +61,13 @@ def _serialize_bid(bid):
 @role_required("print_shop")
 def list_open_inquiries_for_shop():
     """
-    Inquiries a shop can actually bid on: still open (status
-    'submitted'), in a category the shop registered for, with a flag
-    on each one showing whether this shop has already bid on it -
-    the frontend uses that to grey out or hide the bid button rather
-    than letting someone try to bid twice and hit a 409.
+    Every open inquiry (status 'submitted') on the platform, shown to
+    any approved shop regardless of category - a shop decides for
+    itself whether a job is something it can do, rather than the
+    platform pre-filtering that decision away. Each one is flagged
+    with whether this shop has already bid on it, so the frontend can
+    grey out or hide the bid button rather than letting someone try
+    to bid twice and hit a 409.
     """
     shop = _get_current_print_shop()
     if shop is None:
@@ -74,12 +76,8 @@ def list_open_inquiries_for_shop():
     if shop.approval_status != "approved":
         return jsonify({"error": "Your shop is not yet approved to view inquiries"}), 403
 
-    category_ids = [s.print_category_id for s in shop.services]
-    if not category_ids:
-        return jsonify([]), 200
-
     inquiries = (
-        Inquiry.query.filter(Inquiry.status == "submitted", Inquiry.print_category_id.in_(category_ids))
+        Inquiry.query.filter(Inquiry.status == "submitted")
         .order_by(Inquiry.created_at.desc())
         .all()
     )
@@ -118,12 +116,6 @@ def submit_bid(inquiry_id):
     inquiry = db.session.get(Inquiry, inquiry_id)
     if inquiry is None or inquiry.status != "submitted":
         return jsonify({"error": "Inquiry not found or not open for bidding"}), 404
-
-    offers_category = ShopService.query.filter_by(
-        print_shop_id=shop.id, print_category_id=inquiry.print_category_id
-    ).first()
-    if offers_category is None:
-        return jsonify({"error": "Your shop does not offer this print category"}), 403
 
     bid = Bid(
         inquiry_id=inquiry.id,
