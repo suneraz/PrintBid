@@ -7,6 +7,17 @@
       <p class="page__subtitle">Order #{{ order.id }} &middot; {{ order.delivery_method }}</p>
     </div>
 
+    @if (specificationEntries().length > 0) {
+      <div class="spec-summary card">
+        @for (entry of specificationEntries(); track entry[0]) {
+          <div class="spec-item">
+            <span class="spec-item__label">{{ entry[0] }}</span>
+            <span class="spec-item__value">{{ entry[1] }}</span>
+          </div>
+        }
+      </div>
+    }
+
     @if (order.status === 'Cancelled') {
       <div class="card cancelled-banner">This order was cancelled.</div>
     } @else {

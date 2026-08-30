@@ -3,6 +3,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 
 import { OrderService } from '../../core/services/order.service';
+import { InquiryService } from '../../core/services/inquiry.service';
 import { Order, OrderStatus } from '../../core/models/order.model';
 import { IconComponent } from '../../shared/components/icon/icon.component';
 
@@ -18,9 +19,11 @@ const ORDER_STAGES: OrderStatus[] = ['Confirmed', 'In Production', 'Ready', 'Dis
 export class ShopOrderDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private orderService = inject(OrderService);
+  private inquiryService = inject(InquiryService);
 
   orderId = Number(this.route.snapshot.paramMap.get('id'));
   order = signal<Order | null>(null);
+  specificationEntries = signal<[string, string | number][]>([]);
   stages = ORDER_STAGES;
 
   isUpdating = signal(false);
@@ -48,7 +51,15 @@ export class ShopOrderDetailComponent implements OnInit {
 
   private loadOrder(): void {
     this.orderService.listMyOrdersAsShop().subscribe((orders) => {
-      this.order.set(orders.find((o) => o.id === this.orderId) ?? null);
+      const found = orders.find((o) => o.id === this.orderId) ?? null;
+      this.order.set(found);
+
+      if (found?.specification) {
+        const entries = Object.entries(found.specification).filter(
+          ([, v]) => v !== undefined && v !== null && v !== '',
+        ) as [string, string | number][];
+        this.specificationEntries.set(entries);
+      }
     });
   }
 
@@ -88,5 +99,9 @@ export class ShopOrderDetailComponent implements OnInit {
         this.updateError.set(err.error?.error ?? 'Could not update order status.');
       },
     });
+  }
+
+  downloadAttachment(file: { id: number; original_filename: string }): void {
+    this.inquiryService.downloadAttachment(file.id, file.original_filename);
   }
 }

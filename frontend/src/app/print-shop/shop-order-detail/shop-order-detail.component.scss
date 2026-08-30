@@ -191,3 +191,65 @@ textarea {
     font-size: 0.9rem;
   }
 }
+
+.attachments-card {
+  padding: var(--space-md);
+  margin-bottom: var(--space-lg);
+
+  h2 { font-size: 1rem; margin: 0 0 var(--space-sm); }
+}
+
+.attachments-card__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+
+  li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--color-pearl);
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.88rem;
+  }
+}
+
+.link-button {
+  background: none;
+  border: none;
+  color: var(--color-accent);
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 0;
+
+  &:hover { text-decoration: underline; }
+}
+
+.spec-summary {
+  padding: var(--space-md);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+}
+
+.spec-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.spec-item__label {
+  font-size: 0.72rem;
+  text-transform: capitalize;
+  color: var(--color-text-muted);
+}
+
+.spec-item__value {
+  font-size: 0.88rem;
+  font-weight: 600;
+}

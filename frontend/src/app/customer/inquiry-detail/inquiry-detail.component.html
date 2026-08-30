@@ -37,7 +37,7 @@
     @if (paymentDone()) {
       <div class="card payment-success">
         <app-icon name="check" [size]="28" />
-        <h2>Demo Payment - No Real Money Processed</h2>
+        <h2>Demo Payment</h2>
         <p>Your order has been confirmed. Track its progress from your orders page.</p>
         <button type="button" class="button button--primary" (click)="goToOrder()">View My Orders</button>
       </div>
@@ -54,7 +54,7 @@
             </div>
           }
 
-          <p class="demo-notice">Demo Payment - No Real Money Processed</p>
+          <p class="demo-notice">Demo Payment</p>
 
           <button type="button" class="button button--primary" [disabled]="isSimulatingPayment()" (click)="simulatePayment()">
             {{ isSimulatingPayment() ? 'Processing...' : 'Simulate Advance Payment' }}

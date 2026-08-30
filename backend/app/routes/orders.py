@@ -41,6 +41,7 @@ def _get_current_print_shop():
 
 
 def _serialize_order(order):
+    spec = order.inquiry.specification if order.inquiry else None
     return {
         "id": order.id,
         "inquiry_id": order.inquiry_id,
@@ -50,6 +51,25 @@ def _serialize_order(order):
         "status": order.status,
         "delivery_method": order.delivery_method,
         "created_at": order.created_at.isoformat() if order.created_at else None,
+        "specification": {
+            "quantity": spec.quantity,
+            "standard_size": spec.standard_size,
+            "width": spec.width,
+            "height": spec.height,
+            "paper_type": spec.paper_type,
+            "gsm": spec.gsm,
+            "colour_mode": spec.colour_mode,
+            "sides": spec.sides,
+            "page_count": spec.page_count,
+            "finishing_type": spec.finishing_type,
+            "urgency": spec.urgency,
+            "deadline": spec.deadline,
+            "location": spec.location,
+        } if spec else None,
+        "attachments": [{
+            "id": a.id,
+            "original_filename": a.original_filename,
+        } for a in order.inquiry.attachments] if order.inquiry else [],
         "status_history": [{
             "status": h.status,
             "changed_at": h.changed_at.isoformat() if h.changed_at else None,

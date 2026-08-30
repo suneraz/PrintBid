@@ -7,6 +7,17 @@
       <p class="page__subtitle capitalize">Order #{{ order.id }} &middot; {{ order.print_category }} &middot; {{ order.delivery_method }}</p>
     </div>
 
+    @if (specificationEntries().length > 0) {
+      <div class="spec-summary card">
+        @for (entry of specificationEntries(); track entry[0]) {
+          <div class="spec-item">
+            <span class="spec-item__label">{{ entry[0] }}</span>
+            <span class="spec-item__value">{{ entry[1] }}</span>
+          </div>
+        }
+      </div>
+    }
+
     @if (order.status === 'Cancelled') {
       <div class="card cancelled-banner">This order was cancelled.</div>
     } @else {
@@ -21,6 +32,20 @@
             <span class="step__label">{{ stage }}</span>
           </div>
         }
+      </div>
+    }
+
+    @if (order.attachments.length > 0) {
+      <div class="card attachments-card">
+        <h2>Reference Files from Customer</h2>
+        <ul class="attachments-card__list">
+          @for (file of order.attachments; track file.id) {
+            <li>
+              <span>{{ file.original_filename }}</span>
+              <button type="button" class="link-button" (click)="downloadAttachment(file)">Download</button>
+            </li>
+          }
+        </ul>
       </div>
     }
 

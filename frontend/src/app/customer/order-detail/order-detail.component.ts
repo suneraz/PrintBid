@@ -26,6 +26,7 @@ export class OrderDetailComponent implements OnInit {
 
   orderId = Number(this.route.snapshot.paramMap.get('id'));
   order = signal<Order | null>(null);
+  specificationEntries = signal<[string, string | number][]>([]);
   stages = ORDER_STAGES;
 
   rating = signal(5);
@@ -61,7 +62,15 @@ export class OrderDetailComponent implements OnInit {
 
   private loadOrder(): void {
     this.orderService.listMyOrders().subscribe((orders) => {
-      this.order.set(orders.find((o) => o.id === this.orderId) ?? null);
+      const found = orders.find((o) => o.id === this.orderId) ?? null;
+      this.order.set(found);
+
+      if (found?.specification) {
+        const entries = Object.entries(found.specification).filter(
+          ([, v]) => v !== undefined && v !== null && v !== '',
+        ) as [string, string | number][];
+        this.specificationEntries.set(entries);
+      }
     });
   }
 
