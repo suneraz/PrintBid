@@ -28,23 +28,36 @@
       </div>
 
       @if (stage() === 'chatting') {
-        <div class="chat-input-row">
-          <div class="glow-wrapper" [class.glow-wrapper--active]="isProcessing()">
-            <div class="glow-inner">
-              <textarea
-                [ngModel]="currentInput()"
-                (ngModelChange)="currentInput.set($event)"
-                (keydown.enter)="$event.preventDefault(); sendMessage()"
-                placeholder="e.g. I need 500 double-sided business cards on 300 GSM art paper..."
-                rows="2"
-                [disabled]="isProcessing()">
-              </textarea>
-              <button type="button" class="send-button" (click)="sendMessage()" [disabled]="isProcessing() || !currentInput().trim()">
-                <app-icon name="send" [size]="18" />
-              </button>
+        @if (askedFieldKey() === 'delivery_method') {
+          <div class="delivery-choice-row">
+            <button type="button" class="delivery-choice" (click)="selectDeliveryMethod('delivery', 'Delivery')" [disabled]="isProcessing()">
+              <app-icon name="package" [size]="18" />
+              Delivery
+            </button>
+            <button type="button" class="delivery-choice" (click)="selectDeliveryMethod('self-collection', 'Self-collection')" [disabled]="isProcessing()">
+              <app-icon name="shop" [size]="18" />
+              Self-collection
+            </button>
+          </div>
+        } @else {
+          <div class="chat-input-row">
+            <div class="glow-wrapper" [class.glow-wrapper--active]="isProcessing()">
+              <div class="glow-inner">
+                <textarea
+                  [ngModel]="currentInput()"
+                  (ngModelChange)="currentInput.set($event)"
+                  (keydown.enter)="$event.preventDefault(); sendMessage()"
+                  placeholder="e.g. I need 500 double-sided business cards on 300 GSM art paper..."
+                  rows="2"
+                  [disabled]="isProcessing()">
+                </textarea>
+                <button type="button" class="send-button" (click)="sendMessage()" [disabled]="isProcessing() || !currentInput().trim()">
+                  <app-icon name="send" [size]="18" />
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        }
       }
     </div>
 

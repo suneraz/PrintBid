@@ -101,8 +101,13 @@ export class NewInquiryComponent implements OnInit {
 
   // Which specific field the bot's last message asked about - null
   // while we're still on the open-ended opening question, since that
-  // one still goes through NER rather than direct assignment.
-  private askedFieldKey: string | null = null;
+  // one still goes through NER rather than direct assignment. This
+  // is a signal (not a plain field) so the template can react to it
+  // directly - e.g. showing dedicated buttons instead of a text
+  // input when the current field is delivery_method, rather than
+  // relying on free-text parsing for something that's really just a
+  // choice between two fixed options.
+  askedFieldKey = signal<string | null>(null);
 
   stage = signal<'chatting' | 'reviewing' | 'submitting' | 'submitted'>('chatting');
   priceEstimate = signal<{ predicted_price: number; price_min: number; price_max: number } | null>(null);
@@ -145,6 +150,20 @@ export class NewInquiryComponent implements OnInit {
 
   removeSelectedFile(index: number): void {
     this.selectedFiles.update((current) => current.filter((_, i) => i !== index));
+  }
+
+  /**
+   * Delivery method is really just a choice between two fixed
+   * options, not something that benefits from being typed - this
+   * skips free text entirely and assigns the exact clean value
+   * directly, the same way the follow-up flow works, but without
+   * any parsing step that a typed answer would need.
+   */
+  selectDeliveryMethod(value: 'delivery' | 'self-collection', label: string): void {
+    this.messages.update((m) => [...m, { role: 'user', text: label }]);
+    this.specification.update((current) => ({ ...current, delivery_method: value }));
+    this.scrollToBottom();
+    this.askNext();
   }
 
   editableFields = computed(() =>
@@ -194,7 +213,7 @@ export class NewInquiryComponent implements OnInit {
 
   private askNext(): void {
     const missing = this.findMissingField();
-    this.askedFieldKey = missing?.key ?? null;
+    this.askedFieldKey.set(missing?.key ?? null);
 
     if (missing) {
       this.messages.update((m) => [...m, { role: 'bot', text: missing.question }]);
@@ -218,8 +237,8 @@ export class NewInquiryComponent implements OnInit {
     // A targeted follow-up already tells us which field this answer
     // is for - assign it directly rather than re-running NER on a
     // bare fragment it wasn't trained to interpret.
-    if (this.askedFieldKey) {
-      this.assignDirectAnswer(this.askedFieldKey, text);
+    if (this.askedFieldKey()) {
+      this.assignDirectAnswer(this.askedFieldKey()!, text);
       return;
     }
 
