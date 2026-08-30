@@ -1,66 +1,7 @@
 <div class="page">
   <div class="page__header">
-    <h1>My Shop</h1>
-    <p class="page__subtitle">Manage the categories you offer and show off your work</p>
-  </div>
-
-  <h2 class="section-title">Printing Services</h2>
-  <div class="card services-card">
-    <p class="services-card__hint">Select every category your shop can produce - this is shown on your profile so customers know what to expect, but you'll still see every open inquiry regardless.</p>
-
-    @if (categoriesError()) {
-      <p class="form-error">{{ categoriesError() }}</p>
-    }
-
-    <div class="category-grid">
-      @for (category of allCategories(); track category.id) {
-        <label class="category-option" [class.category-option--selected]="isSelected(category.id)">
-          <input type="checkbox" [checked]="isSelected(category.id)" (change)="toggleCategory(category.id)" />
-          <span class="capitalize">{{ category.name }}</span>
-        </label>
-      }
-    </div>
-
-    @if (servicesSaved()) {
-      <p class="save-success">Saved.</p>
-    }
-
-    <button type="button" class="button button--primary" [disabled]="isSavingServices()" (click)="saveServices()">
-      {{ isSavingServices() ? 'Saving...' : 'Save Services' }}
-    </button>
-  </div>
-
-  <h2 class="section-title">Portfolio</h2>
-  <div class="card portfolio-card">
-    <p class="portfolio-card__hint">Show customers examples of your previous work - up to 8 images.</p>
-
-    @if (portfolioError()) {
-      <p class="form-error">{{ portfolioError() }}</p>
-    }
-
-    <div class="portfolio-grid">
-      @for (item of portfolioItems(); track item.id) {
-        <div class="portfolio-item">
-          @if (item.objectUrl) {
-            <img [src]="item.objectUrl" [alt]="item.caption ?? 'Portfolio sample'" />
-          } @else {
-            <div class="portfolio-item__loading"></div>
-          }
-          <button type="button" class="portfolio-item__remove" (click)="deletePortfolioItem(item.id)" aria-label="Remove image">&times;</button>
-        </div>
-      }
-
-      @if (portfolioItems().length < 8) {
-        <label class="portfolio-upload" [class.portfolio-upload--busy]="isUploadingPortfolio()">
-          @if (isUploadingPortfolio()) {
-            <span>Uploading...</span>
-          } @else {
-            <span>+ Add image</span>
-          }
-          <input type="file" accept=".jpg,.jpeg,.png" (change)="onPortfolioFileSelected($event)" [disabled]="isUploadingPortfolio()" hidden />
-        </label>
-      }
-    </div>
+    <h1>Reviews</h1>
+    <p class="page__subtitle">What customers are saying about completed orders</p>
   </div>
 
   <h2 class="section-title">

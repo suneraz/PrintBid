@@ -94,7 +94,7 @@ export const routes: Routes = [
         loadComponent: () => import('./print-shop/shop-order-detail/shop-order-detail.component').then((m) => m.ShopOrderDetailComponent),
       },
       {
-        path: 'my-shop',
+        path: 'reviews',
         loadComponent: () => import('./print-shop/my-shop/my-shop.component').then((m) => m.MyShopComponent),
       },
     ],

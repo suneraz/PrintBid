@@ -98,6 +98,11 @@ export class InquiryBidComponent implements OnInit {
       return;
     }
 
+    if (this.selectedFiles().length === 0) {
+      this.fileError.set('At least one sample image is required to submit a bid.');
+      return;
+    }
+
     this.isSubmitting.set(true);
     this.submitError.set(null);
 

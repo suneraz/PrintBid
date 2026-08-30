@@ -38,7 +38,7 @@ const NAV_BY_ROLE: Record<UserRole, NavItem[]> = {
     { label: 'Open Inquiries', path: '/print-shop/open-inquiries', icon: 'list' },
     { label: 'My Bids', path: '/print-shop/bids', icon: 'tag' },
     { label: 'My Orders', path: '/print-shop/orders', icon: 'package' },
-    { label: 'My Shop', path: '/print-shop/my-shop', icon: 'shop' },
+    { label: 'Reviews', path: '/print-shop/reviews', icon: 'shop' },
     { label: 'My Profile', path: '/profile', icon: 'users' },
   ],
   admin: [
