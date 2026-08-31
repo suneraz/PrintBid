@@ -3,3 +3,5 @@
 app/uploads/*
 !app/uploads/.gitkeep
 !app/uploads/**/.gitkeep
+render.env
+Copy.env

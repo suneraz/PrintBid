@@ -2,3 +2,11 @@ __pycache__/
 .ipynb_checkpoints/
 ml/ner_model/src/training_output/
 *.pyc
+ 
+# Backend
+backend/venv/
+backend/.env
+backend/instance/
+backend/ca.pem
+backend/render.env
+backend/Copy.env
