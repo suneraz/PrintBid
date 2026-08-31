@@ -33,6 +33,17 @@ class Config:
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+    # Hosted MySQL providers (Aiven, PlanetScale, etc.) generally
+    # require an SSL connection and won't accept a plain one at all.
+    # Local development doesn't need this at all, so it's entirely
+    # opt-in via DB_SSL_CA - if that variable isn't set (the normal
+    # case on your own machine), the connection behaves exactly as it
+    # always has, with zero change to local behaviour.
+    DB_SSL_CA = os.environ.get("DB_SSL_CA")
+    SQLALCHEMY_ENGINE_OPTIONS = (
+        {"connect_args": {"ssl": {"ca": DB_SSL_CA}}} if DB_SSL_CA else {}
+    )
+
     # Angular dev server origin, so the frontend can call this API
     # during development without CORS blocking it.
     CORS_ORIGINS = os.environ.get("CORS_ORIGINS", "http://localhost:4200").split(",")
