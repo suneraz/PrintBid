@@ -16,16 +16,15 @@ Repository: https://github.com/suneraz/PrintBid
 2. [Tech Stack](#tech-stack)
 3. [Project Structure](#project-structure)
 4. [Prerequisites](#prerequisites)
-5. [First-Time Setup](#first-time-setup)
+5. [Setup](#setup)
 6. [Running the Application](#running-the-application)
-7. [Demo Accounts](#demo-accounts)
-8. [Seeding Demo Data](#seeding-demo-data)
-9. [Features by Role](#features-by-role)
-10. [AI/ML Components](#aiml-components)
-11. [Environment Variables](#environment-variables)
-12. [Database Migrations](#database-migrations)
-13. [Design Decisions & Known Limitations](#design-decisions--known-limitations)
-14. [Troubleshooting](#troubleshooting)
+7. [Creating an Admin Account](#creating-an-admin-account)
+8. [Features by Role](#features-by-role)
+9. [AI/ML Components](#aiml-components)
+10. [Environment Variables](#environment-variables)
+11. [Database Migrations](#database-migrations)
+12. [Design Decisions & Known Limitations](#design-decisions--known-limitations)
+13. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -36,7 +35,7 @@ git clone https://github.com/suneraz/PrintBid.git
 cd PrintBid
 ```
 
-The default branch is `main`.
+The default branch is main.
 
 ---
 
@@ -68,9 +67,8 @@ backend/
   migrations/versions/  - Alembic migration history
   config.py
   run.py
-  seed.py              - Seeds the 13 print categories
-  seed_demo_users.py   - Seeds 10 demo customers + 10 demo print shops
-  seed_demo_inquiries.py  - Seeds 10 realistic demo inquiries
+  seed.py              - Seeds the print categories
+  create_admin.py      - Creates an admin account
   requirements.txt
 frontend/
   src/app/
@@ -80,8 +78,6 @@ frontend/
     shared/          - Shared components (nav shell, icons, profile page)
     core/            - Services, models, guards, interceptors
 ml/                      - ML training notebooks/scripts (not needed to run the app)
-setup.bat / setup.ps1    - First-time automated setup
-run-printbid.bat         - Starts both servers
 ```
 
 ---
@@ -99,32 +95,28 @@ Install these before doing anything else:
 
 ---
 
-## First-Time Setup
-
-### Option A - Automated (recommended)
-
-Double-click **setup.bat** in the project root. It will:
-- Check that Python and Node.js are installed
-- Create the backend virtual environment and install all Python dependencies
-- Ask for your MySQL username/password and generate a .env file
-- Create the database and run all migrations
-- Seed the 13 print categories and create a working admin account
-- Install all frontend dependencies
-
-### Option B - Manual
+## Setup
 
 ```
 cd backend
 py -3.13 -m venv venv
 venv\Scripts\activate
 pip install -r requirements.txt
+```
 
-# Create a .env file in backend/ (see Environment Variables section below)
+Create a file named .env inside backend/ (see Environment Variables below for
+the exact contents needed).
 
+Then create the database and apply migrations:
+
+```
 flask db upgrade
 python3 seed.py
-python3 create_admin.py
+```
 
+Finally, set up the frontend:
+
+```
 cd ..\frontend
 npm install
 ```
@@ -133,18 +125,16 @@ npm install
 
 ## Running the Application
 
-Once setup is complete:
+Two terminals, both left running:
 
-**Automated:** double-click **run-printbid.bat** - opens two windows, one for
-each server.
-
-**Manual:**
 ```
 # Terminal 1
 cd backend
 venv\Scripts\activate
 python3 run.py
+```
 
+```
 # Terminal 2
 cd frontend
 ng serve
@@ -154,42 +144,16 @@ Then open **http://localhost:4200** in a browser.
 
 ---
 
-## Demo Accounts
-
-All demo accounts use the password: **password123**
-
-### Admin
-| Email | Password |
-|---|---|
-| admin@printbid.com | admin123 |
-
-### Demo Customers (created by seed_demo_users.py)
-Nimal Perera, Kavindi Fernando, Ruwan Jayasuriya, Chamari Wickramasinghe,
-Tharindu Bandara, Anushka Silva, Dilani Gunawardena, Mohamed Rizwan,
-Priyanka Rathnayake, Ashan Kumara - emails follow the pattern
-firstname.lastname@test.com (e.g. nimal.perera@test.com).
-
-### Demo Print Shops (created by seed_demo_users.py, all pre-approved)
-Colombo Quick Print, Kandy Digital Printers, Galle Print Hub, Negombo Print
-Solutions, Jaffna Print House, Kurunegala Print Point, Matara Print Studio,
-Anuradhapura Print Works, Ratnapura Print Zone, Batticaloa Print Express -
-emails follow the pattern city.shopname@test.com (e.g.
-colombo.quickprint@test.com).
-
----
-
-## Seeding Demo Data
-
-To avoid manually registering test accounts and inquiries one by one:
+## Creating an Admin Account
 
 ```
 cd backend
-python3 seed_demo_users.py       # 10 customers + 10 pre-approved print shops
-python3 seed_demo_inquiries.py   # 10 realistic inquiries, one per demo customer
+venv\Scripts\activate
+python3 create_admin.py
 ```
 
-Both scripts are safe to re-run - they skip anything that already exists rather
-than creating duplicates.
+This will prompt for an email, name, and password for the admin account
+interactively.
 
 ---
 
@@ -251,7 +215,7 @@ almost always a missing/misplaced model file, not a code issue.
 
 ## Environment Variables
 
-backend/.env (never committed - create it yourself, or let setup.bat do it):
+backend/.env (never committed - create it yourself):
 
 ```
 SECRET_KEY=<any random string>
@@ -272,8 +236,8 @@ Migrations live in backend/migrations/versions/ and run in order via:
 ```
 flask db upgrade
 ```
-This must be run after every fresh clone/extraction, and again any time a new
-migration file is added.
+This must be run after every fresh clone, and again any time a new migration
+file is added.
 
 ---
 
